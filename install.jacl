@@ -1,9 +1,0 @@
-#tcljava
-mvn install:install-file -Dfile=lib\tcljava1.4.1\jacl.jar -DgroupId=jacl -DartifactId=jacl -Dversion=1.4.1 -Dpackaging=jar -DgeneratePom=true
-mvn install:install-file -Dfile=lib\tcljava1.4.1\tcljava.jar -DgroupId=jacl -DartifactId=tcljava -Dversion=1.4.1 -Dpackaging=jar -DgeneratePom=true
-mvn install:install-file -Dfile=lib\tcljava1.4.1\janino.jar -DgroupId=jacl -DartifactId=janino -Dversion=1.4.1 -Dpackaging=jar -DgeneratePom=true
-mvn install:install-file -Dfile=lib\tcljava1.4.1\itcl.jar -DgroupId=jacl -DartifactId=itcl -Dversion=1.4.1 -Dpackaging=jar -DgeneratePom=true
-mvn install:install-file -Dfile=lib\tcljava1.4.1\tjc.jar -DgroupId=jacl -DartifactId=tjc -Dversion=1.4.1 -Dpackaging=jar -DgeneratePom=true
-
-#jsch
-mvn install:install-file -Dfile=lib\jsch-0.1.32.jar -DgroupId=jsch -DartifactId=jsch -Dversion=0.1.32 -Dpackaging=jar -DgeneratePom=true
