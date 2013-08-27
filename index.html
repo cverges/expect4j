@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Expect4j by cverges</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Expect4j</h1>
+        <p>A fork of the Expect4J project at http://code.google.com/p/expect4j</p>
+
+        <p class="view"><a href="https://github.com/cverges/expect4j">View the Project on GitHub <small>cverges/expect4j</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/cverges/expect4j/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/cverges/expect4j/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/cverges/expect4j">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h3>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h3>
+
+<p>A powerful feature of Tcl has always been its integration with the
+Expect library (<a href="http://expect.nist.gov">http://expect.nist.gov</a>). As Tcl has been ported to the
+Java platform (<a href="http://tcljava.sourceforge.net/">http://tcljava.sourceforge.net/</a>) certain C-based
+libraries have been left behind. Expect4j is an attempt to rewrite
+Expect in Java and provide bindings to the TclJava interpreter. The goal
+is to be able to port existing Tcl code bases that use Expect directly
+to Java without changes. The current version has successfully run a
+10,000 line Tcl script which heavily depends on Expect for it operation.</p>
+
+<p>Expect is the kitchen sink of IO control. It supports control of
+processes and sockets, and a complex method of match multiple patterns
+at the same time. These are needed in some applications, but it
+complicates the API a tad. Especially when it used in Java which doesn't
+support closures natively. There are other libraries which offer a more
+concise API, e.g. enchanter (<a href="http://code.google.com/p/enchanter/">http://code.google.com/p/enchanter/</a>).
+enchanter is a very good library and it is highly recommended for
+automating ssh/telnet sessions. But when Expect syntax is needed,
+Expect4j is the way to go.</p>
+
+<p>Excellent article on using expect4j:
+<a href="http://nikunjp.wordpress.com/2011/07/30/remote-ssh-using-jsch-with-expect4j/">http://nikunjp.wordpress.com/2011/07/30/remote-ssh-using-jsch-with-expect4j/</a></p>
+
+<h3>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h3>
+
+<p>Pre-requisites:</p>
+
+<ul>
+<li>Maven 3</li>
+</ul><p>Build instructions:</p>
+
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+<span class="c"># Checkout the repository</span>
+git clone https://github.com/cverges/expect4j.git
+
+<span class="c"># Change to the workspace</span>
+<span class="nb">cd </span>expect4j/
+
+<span class="c"># Build everything via maven</span>
+mvn clean install
+</pre></div>
+
+<h3>
+<a name="copyright-and-licensing" class="anchor" href="#copyright-and-licensing"><span class="octicon octicon-link"></span></a>Copyright and Licensing</h3>
+
+<p>© 2007 Justin Ryan<br>
+© 2013 Chris Verges &lt;<a href="mailto:chris.verges@gmail.com">chris.verges@gmail.com</a>&gt;</p>
+
+<p>Licensed under the terms of the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Public License v2.0</a>.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/cverges">cverges</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
