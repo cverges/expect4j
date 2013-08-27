@@ -1,12 +1,9 @@
 # Expect4J
 
-## Copyright
+## Copyright and Licensing
 
-Copyright &copy; 2007 Justin Ryan
-
+Copyright &copy; 2007 Justin Ryan  
 Copyright &copy; 2013 Chris Verges &lt;chris.verges@gmail.com&gt;
-
-## Licensing
 
 Licensed under the terms of the Apache Public License v2.0.
 
