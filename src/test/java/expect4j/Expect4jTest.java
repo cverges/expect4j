@@ -209,11 +209,11 @@ public class Expect4jTest extends TestCase {
      */
     public void testEofMultiple() throws Exception {
         Expect4j.log.info("\n\n\n\nexpect eof multiple");
-        
-        pair = new DelayedPair(testStr, 5, 0); // should hit EOF quickly
+
+        pair = new DelayedPair(testStr, 1, 1); // should hit EOF quickly
         Expect4j instance = new Expect4j(pair);
         instance.setDefaultTimeout(2000);
-                
+
         // "The quick brown fox jumps over the lazy dog"
         List pairs = new ArrayList();
         pairs.add( new GlobMatch("The quick", new Closure() {

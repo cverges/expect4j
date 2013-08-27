@@ -38,15 +38,14 @@ public class ExpectUtilsHttpTest extends TestCase {
         System.setProperty("expect4j.level", "400");
         java.util.logging.LogManager.getLogManager().readConfiguration();
  
-        String remotehost = "seas.harvard.edu";
+        String remotehost = "www.seas.harvard.edu";
         String url = "/";
         String expResult = "Harvard School of Engineering and Applied Sciences";
  
         String result = ExpectUtils.Http(remotehost, url);
- 
+
         assertNotNull(result);
  
         assertTrue( result.indexOf(expResult) != -1 );
- 
     }
 }

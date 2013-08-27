@@ -43,9 +43,32 @@ public abstract class ExpectUtils {
         s = new Socket(remotehost, 80);
         log.fine("Connected to " + s.getInetAddress().toString() );
 
+        if (false) {
+            // for debugging only
+            PrintWriter out = new PrintWriter(s.getOutputStream(), false);
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+
+            System.out.println("Sending request");
+            out.print("GET " + url + " HTTP/1.1\r\n");
+            out.print("Host: " + remotehost + "\r\n");
+            out.print("Connection: close\r\n");
+            out.print("User-Agent: Expect4j\r\n");
+            out.print("\r\n");
+            out.flush();
+            System.out.println("Request sent");
+
+            System.out.println("Receiving response");
+            String line;
+            while ((line = in.readLine()) != null)
+                System.out.println(line);
+            System.out.println("Received response");
+            if (line == null)
+                System.exit(0);
+        }
+
         Expect4j expect = new Expect4j(s);
         
-        expect.send("GET " + url + " HTTP 1.1\r\n");
+        expect.send("GET " + url + " HTTP/1.1\r\n");
         expect.send("Host: " + remotehost + "\r\n");
         expect.send("Connection: close\r\n");
         expect.send("User-Agent: Expect4j\r\n");
@@ -87,7 +110,6 @@ public abstract class ExpectUtils {
         remaining = expect.getLastState().getBuffer(); // from EOF matching
         
         String httpCode = (String) expect.getLastState().getVar("httpCode");
-        System.out.println("HTTP Code: " + httpCode);
 
         String contentType = (String) expect.getLastState().getVar("contentType");
         log.fine("Content Type: " + contentType );
@@ -211,13 +233,16 @@ public abstract class ExpectUtils {
             System.out.flush();
         }
     }
-     */
+    */
+
     public static Expect4j spawn(String cmdLine) throws Exception {
         String[] cmdArgs = cmdLine.split(" ");
-        Process process = Runtime.getRuntime().exec( cmdArgs );
-        
-        Expect4j expect = new Expect4j( process );
-        
+        return spawn(cmdArgs);
+    }
+
+    public static Expect4j spawn(String cmdArgs[]) throws Exception {
+        Process process = Runtime.getRuntime().exec(cmdArgs);
+        Expect4j expect = new Expect4j(process);
         return expect;
     }
 }
