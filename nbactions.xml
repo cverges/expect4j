@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>run</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>package</goal>
+                <goal>org.codehaus.mevenide:netbeans-run-plugin:RELEASE:run-jar</goal>
+            </goals>
+            <properties>
+                <netbeans.jar.run.jvmparams>-Djava.util.logging.config.file=logging.properties</netbeans.jar.run.jvmparams>
+            </properties>
+        </action>
+        <action>
+            <actionName>debug</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>package</goal>
+                <goal>org.codehaus.mevenide:netbeans-run-plugin:RELEASE:run-jar</goal>
+            </goals>
+            <properties>
+                <jpda.listen>true</jpda.listen>
+                <netbeans.jar.run.jvmparams>-Djava.util.logging.config.file=logging.properties</netbeans.jar.run.jvmparams>
+                <netbeans.jar.run.debugparams>-Xdebug -Djava.compiler=none -Xnoagent -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address}</netbeans.jar.run.debugparams>
+            </properties>
+        </action>
+    </actions>
