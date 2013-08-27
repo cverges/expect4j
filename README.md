@@ -3,6 +3,7 @@
 ## Copyright
 
 Copyright (c) 2007 Justin Ryan
+
 Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
 
 ## Licensing
