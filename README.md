@@ -2,9 +2,9 @@
 
 ## Copyright
 
-Copyright (c) 2007 Justin Ryan
+Copyright &copy; 2007 Justin Ryan
 
-Copyright (c) 2013 Chris Verges &lt;chris.verges@gmail.com&gt;
+Copyright &copy; 2013 Chris Verges &lt;chris.verges@gmail.com&gt;
 
 ## Licensing
 
@@ -33,3 +33,24 @@ Expect4j is the way to go.
 
 Excellent article on using expect4j:
 http://nikunjp.wordpress.com/2011/07/30/remote-ssh-using-jsch-with-expect4j/
+
+## Getting Started
+
+Pre-requisites:
+
+  * Maven 3
+
+Build instructions:
+
+```bash
+#!/bin/bash
+
+# Checkout the repository
+git clone https://github.com/cverges/expect4j.git
+
+# Change to the workspace
+cd expect4j/
+
+# Build everything via maven
+mvn clean install
+```
