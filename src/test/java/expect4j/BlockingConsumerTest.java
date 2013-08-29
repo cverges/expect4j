@@ -1,22 +1,40 @@
 /*
- * BlockingConsumerTest.java
- * JUnit based test
+ * Copyright (c) 2007 Justin Ryan
+ * Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
  *
- * Created on January 16, 2007, 11:54 PM
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
 package expect4j;
 
-import junit.framework.*;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.io.IOException;
+import junit.framework.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * TODO
  *
- * @author justin
+ * @author Chris Verges
+ * @author Justin Ryan
  */
 public class BlockingConsumerTest extends TestCase {
+    /**
+     * Interface to the Java 2 platform's core logging facilities.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(BlockingConsumerTest.class);
     
     public BlockingConsumerTest(String testName) {
         super(testName);
@@ -66,7 +84,7 @@ public class BlockingConsumerTest extends TestCase {
     }
     
     public void testMatch() {
-        Expect4j.log.entering(getClass().getName(), "testMatch");
+        logger.info("Entering " + getClass().getName() + ".testMatch");
         
         consumerThread.start();
         
@@ -82,7 +100,7 @@ public class BlockingConsumerTest extends TestCase {
         
         consumer.stop();
         
-        Expect4j.log.exiting(getClass().getName(), "testMatch");
+        logger.info("Exiting " + getClass().getName() + ".testMatch");
     }
     
     public void testWrite() throws IOException {

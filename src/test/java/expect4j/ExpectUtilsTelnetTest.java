@@ -1,20 +1,38 @@
 /*
- * ExpectUtilsTelnetTest.java
- * JUnit based test
+ * Copyright (c) 2007 Justin Ryan
+ * Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
  *
- * Created on March 16, 2007, 9:42 AM
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
 package expect4j;
 
-import junit.framework.*;
 import expect4j.matches.*;
+import junit.framework.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * TODO
  *
- * @author justin
+ * @author Chris Verges
+ * @author Justin Ryan
  */
 public class ExpectUtilsTelnetTest extends TestCase {
+    /**
+     * Interface to the Java 2 platform's core logging facilities.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(ExpectUtilsTelnetTest.class);
     
     public ExpectUtilsTelnetTest(String testName) {
         super(testName);
@@ -44,7 +62,11 @@ public class ExpectUtilsTelnetTest extends TestCase {
         expect.expect( new Match[] {
             new GlobMatch("login: ", new Closure() {
                 public void run(ExpectState state) {
-                    try { expect.send(username + "\r"); } catch(Exception e) { Expect4j.log.warning(e.getMessage() ); }
+                    try {
+                        expect.send(username + "\r");
+                    } catch (Exception e) {
+                        logger.warn(e.getMessage());
+                    }
                     state.addVar("sentUsername", Boolean.TRUE);
                     state.exp_continue();
                 }
@@ -58,14 +80,18 @@ public class ExpectUtilsTelnetTest extends TestCase {
             }),
             new GlobMatch("Password:", new Closure() {
                 public void run(ExpectState state) {
-                    try { expect.send(password + "\r");} catch(Exception e) { Expect4j.log.warning(e.getMessage() ); }
+                    try {
+                        expect.send(password + "\r");
+                    } catch (Exception e) {
+                        logger.warn(e.getMessage());
+                    }
                     state.addVar("sentPassword", Boolean.TRUE);
                     state.exp_continue();
                 }
             }),
             new RegExpMatch("@" + hostname + "\\]", new Closure() {
                 public void run(ExpectState state) {
-                    Expect4j.log.warning("Holy crap, this actually worked");
+                    logger.warn("Wow, this actually worked");
                     state.addVar("sentExit", Boolean.TRUE);
                     try { expect.send("exit\r"); } catch(Exception e) { }
                 }
@@ -75,13 +101,13 @@ public class ExpectUtilsTelnetTest extends TestCase {
                 public void run(ExpectState state) {
                     // suck up everything until EOF
                     state.addVar("gotEOF", Boolean.TRUE);
-                    expect.log.warning("EOF");
+                    logger.warn("EOF");
                 }
             }),
             */
             new TimeoutMatch(new Closure() {
                 public void run(ExpectState state) {
-                    Expect4j.log.warning(":-( Timeout");
+                    logger.warn(":-( Timeout");
                 }
             })
         });

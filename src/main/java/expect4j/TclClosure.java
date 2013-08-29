@@ -1,30 +1,37 @@
 /*
- * Copyright 2007 Justin Ryan
+ * Copyright (c) 2007 Justin Ryan
+ * Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
 package expect4j;
 
 import tcl.lang.*;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * TODO
  *
- * @author justin
+ * @author Chris Verges
+ * @author Justin Ryan
  */
 public class TclClosure implements Closure {
-    static final public java.util.logging.Logger log = java.util.logging.Logger.getLogger(TclClosure.class.getName());
+    /**
+     * Interface to the Java 2 platform's core logging facilities.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(TclClosure.class);
     
     Interp interp;
     TclObject tclCode;
@@ -49,7 +56,7 @@ public class TclClosure implements Closure {
         //interp.unsetVar("expect_out", flags);
         
         String buffer = state.getBuffer();
-        log.finer("Setting var expect_out(buffer) to " + buffer);
+        logger.trace("Setting var expect_out(buffer) to " + buffer);
         interp.setVar("expect_out", "buffer", buffer, flags);
         
         int group = 0;
@@ -59,23 +66,23 @@ public class TclClosure implements Closure {
             group++;
             if( match == null )
                 break;
-            log.finer("Setting var expect_out(" + index +") to " + match);
+            logger.trace("Setting var expect_out(" + index +") to " + match);
             interp.setVar("expect_out", index , match, flags);
         }
         
         ExpectEmulation.setExpContinue(interp, false);
         
         if( tclCode != null && tclCode.toString().length() > 0 ) {
-            log.info("Running a tcl bit of code: " + tclCode.toString());
+            logger.debug("Running a tcl bit of code: " + tclCode.toString());
             
             try {
                 interp.eval(tclCode, 0);
             } catch(TclException e) {
-                log.log(Level.INFO, e.toString(), e);
+                logger.warn("Exception: " + e);
                 throw new Exception( interp.getResult().toString(), e);
             }
             if( ExpectEmulation.isExpContinue(interp) ) {
-                log.info("Asked to continue");
+                logger.info("Asked to continue");
                 state.exp_continue();
             }
         }

@@ -1,28 +1,29 @@
 /*
-  * Copyright 2007 Justin Ryan
+ * Copyright (c) 2007 Justin Ryan
+ * Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
+
 package expect4j;
 
-import java.text.StringCharacterIterator;
-import java.util.logging.Level;
-import tcl.lang.*;
 import expect4j.matches.*;
-import org.apache.oro.text.regex.MalformedPatternException;
+import java.text.StringCharacterIterator;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.oro.text.regex.MalformedPatternException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tcl.lang.*;
 
 /**
  * Register commands to support the Expect API
@@ -48,7 +49,10 @@ import java.util.logging.Logger;
  * spawn_id
  */
 public class ExpectEmulation extends Extension {
-    static final public Logger log = Logger.getLogger(ExpectEmulation.class.getName());
+    /**
+     * Interface to the Java 2 platform's core logging facilities.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(ExpectEmulation.class);
     
     //@Overrides
     public void init(Interp interp) {
@@ -68,8 +72,8 @@ public class ExpectEmulation extends Extension {
         
         try {
             interp.pkgProvide("expect", "2.0"); // closest equivalent
-        }catch(TclException te) {
-            log.log( Level.WARNING, te.getMessage(), te);
+        } catch (TclException te) {
+            logger.warn(te.getMessage());
         }
     }
     
@@ -100,7 +104,7 @@ public class ExpectEmulation extends Extension {
             List /* <Pair> */ pairs = new ArrayList();
             int i=0;
             String arg;
-            log.info("Looking at expect args");
+            logger.debug("Looking at expect args");
             Match pair;
             Collection preserved = new ArrayList(argv.length - i);
             
@@ -115,7 +119,7 @@ public class ExpectEmulation extends Extension {
                     TclClosure closure = new TclClosure(interp, tclCode);
                     pair = new TimeoutMatch( closure );
                     
-                    log.finer("Adding Timeout Match");
+                    logger.debug("Adding Timeout Match");
                     
                     pairs.add( pair );
                 } else if( arg.equals("eof") ) {
@@ -125,7 +129,7 @@ public class ExpectEmulation extends Extension {
                     TclClosure closure = new TclClosure(interp, tclCode);
                     pair = new EofMatch( closure );
                     
-                    log.finer("Adding Eof Match");
+                    logger.debug("Adding Eof Match");
                     
                     pairs.add( pair );
                 } else {
@@ -172,7 +176,7 @@ public class ExpectEmulation extends Extension {
                     }
                     closure = new TclClosure(interp, tclCode);
                     
-                    log.info(i + " Pattern Obj is >>" + javaStr + "<< and pattern is >>>" + pattern + "<<<");
+                    logger.debug(i + " Pattern Obj is >>" + javaStr + "<< and pattern is >>>" + pattern + "<<<");
                     try {
                         if( arg.startsWith("-re") ) {
                             // In TCL \[ is used to tell TCL that this is not a nested command
@@ -190,7 +194,7 @@ public class ExpectEmulation extends Extension {
                             throw new TclException(interp, "Exact matches not supported yet");
                         else if( arg.startsWith("-gl") ) {
                             pair = new GlobMatch(pattern, closure);
-                            log.info(i + " Glob at regexp " + ((GlobMatch) pair).getPattern().getPattern() );
+                            logger.debug(i + " Glob at regexp " + ((GlobMatch) pair).getPattern().getPattern() );
                         } else {
                             throw new TclException(interp, "Unknown type of pattern");
                         }
@@ -305,7 +309,7 @@ public class ExpectEmulation extends Extension {
      */
     public class SendCommand implements Command {
         public void cmdProc(Interp interp, TclObject argv[]) throws TclException {
-            log.finest("Send Command arg # " + argv.length);
+            logger.debug("Send Command arg # " + argv.length);
             if (argv.length == 1)
                 throw new TclNumArgsException(interp, 1, argv, "[-flags] [--] string");
             
@@ -392,7 +396,7 @@ public class ExpectEmulation extends Extension {
                 String password = null;
                 while( argv[i].toString().indexOf('-') == 0) {
                     // process arg
-                    log.fine("ssh arg: " + argv[i].toString() );
+                    logger.debug("ssh arg: " + argv[i].toString() );
                     if( argv[i].toString().equals("-l") && i + 1 < argv.length - 1) {
                         username = argv[++i].toString();
                     }
@@ -405,7 +409,7 @@ public class ExpectEmulation extends Extension {
                 if( username == null)
                     throw new TclException(interp, "Username needs to be provided");
                 else
-                    log.finer("Username: " + username);
+                    logger.debug("Username: " + username);
                 
                 if( i >= argv.length )
                     throw new TclNumArgsException(interp, i - 1, argv, "[-l username] [-P password] hostname");
@@ -495,7 +499,7 @@ public class ExpectEmulation extends Extension {
             }
             
             String spawnId = lastSpawnId._i.toString();
-            log.finer("Putting id in " + spawnId);
+            logger.debug("Putting id in " + spawnId);
             spawnIds.put( spawnId, expect4j );
             interp.setAssocData("spawnIds", spawnIds);
             
@@ -508,11 +512,11 @@ public class ExpectEmulation extends Extension {
         }
         
         public void traceProc(Interp interp, String name1, String name2, int flags) {
-            log.info("Tracing");
+            logger.debug("Tracing");
             if ( (flags & TCL.TRACE_DESTROYED) != 0 )
-                log.warning("Trace Destroyed");
+                logger.warn("Trace Destroyed");
             if ( (flags & TCL.INTERP_DESTROYED) != 0 )
-                log.warning("Interp Destroyed");
+                logger.warn("Interp Destroyed");
         }
     }
     
@@ -547,7 +551,7 @@ public class ExpectEmulation extends Extension {
                 throw new TclNumArgsException(interp, 0, argv, "[echo|-echo]");
             
             String cmd = argv[1].toString();
-            log.info("stty cmd is " + cmd);
+            logger.debug("stty cmd is " + cmd);
             if( cmd.equals("echo") )
                 setEcho(interp, true);
             else if( cmd.equals("-echo") )
@@ -617,7 +621,7 @@ public class ExpectEmulation extends Extension {
             return;
         
         TclObject obj = TclBoolean.newInstance(value);
-        log.finest("Setting " + varname + " to " + Boolean.toString(value) );
+        logger.debug("Setting " + varname + " to " + Boolean.toString(value) );
         interp.setVar(varname, obj, TCL.GLOBAL_ONLY);
     }
     

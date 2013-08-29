@@ -1,23 +1,42 @@
 /*
- * Expect4jTest.java
- * JUnit based test
+ * Copyright (c) 2007 Justin Ryan
+ * Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
  *
- * Created on March 10, 2007, 4:26 PM
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
 package expect4j;
 
-import junit.framework.*;
 import expect4j.matches.*;
 import java.io.*;
 import java.util.*;
+import junit.framework.*;
 import org.apache.oro.text.regex.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * TODO
  *
- * @author justin
+ * @author Chris Verges
+ * @author Justin Ryan
  */
 public class Expect4jTest extends TestCase {
+    /**
+     * Interface to the Java 2 platform's core logging facilities.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(Expect4jTest.class);
+
     IOPair pair;
     final String testStr = "The quick brown fox jumps over the lazy dog";
     
@@ -34,7 +53,7 @@ public class Expect4jTest extends TestCase {
     }
     
     public void testSend() throws Exception {
-        Expect4j.log.info("send");
+        logger.info("send");
         
         String str = "Sent";
         Expect4j instance = new Expect4j(pair);
@@ -48,7 +67,7 @@ public class Expect4jTest extends TestCase {
     }
     
     public void testExpectPattern() throws Exception {
-        Expect4j.log.info("expect pattern");
+        logger.info("expect pattern");
         
         Expect4j instance = new Expect4j(pair);
         
@@ -76,7 +95,7 @@ public class Expect4jTest extends TestCase {
                     
     public void testPatternExact() throws Exception {
         String matchStr = "\r\necho \"User=Unknown Date=Mar 29, 2007 Time=17:03PM EDT\"\r";
-        Expect4j.log.info("expect pattern");
+        logger.info("expect pattern");
         
         Expect4j instance = new Expect4j( new StringPair(matchStr) );
         
@@ -94,7 +113,7 @@ public class Expect4jTest extends TestCase {
 
     public void testPatternCR() throws Exception {
         String matchStr = "the quick fox\njumps over ";
-        Expect4j.log.info("\n\nexpect pattern");
+        logger.info("\n\nexpect pattern");
         
         Expect4j instance = new Expect4j( new StringPair(matchStr) );
         
@@ -104,16 +123,16 @@ public class Expect4jTest extends TestCase {
         assertEquals(0, index);
         
         String match = instance.getLastState().getMatch();
-        Expect4j.log.warning("Match: " + match);
+        logger.warn("Match: " + match);
         assertTrue( match.length() > 5 );
         
         String buffer = instance.getLastState().getBuffer();
-        Expect4j.log.warning("Buffer: " + buffer);
+        logger.warn("Buffer: " + buffer);
         assertTrue( buffer.length() == match.length() );
     }
     
     public void testExpectClosure() throws Exception {
-        Expect4j.log.info("expect closure");
+        logger.info("expect closure");
         
         Expect4j instance = new Expect4j(pair);
         
@@ -131,7 +150,7 @@ public class Expect4jTest extends TestCase {
     }
     
     public void testClosureVars() throws Exception {
-        Expect4j.log.info("expect closur vars");
+        logger.info("expect closur vars");
         
         Expect4j instance = new Expect4j(pair);
         
@@ -167,7 +186,7 @@ public class Expect4jTest extends TestCase {
     }
     
     public void testPairIndex() throws Exception {
-        Expect4j.log.info("expect pair index");
+        logger.info("expect pair index");
         
         Expect4j instance = new Expect4j(pair);
         instance.setDefaultTimeout(2000); // quicken our testing
@@ -189,7 +208,7 @@ public class Expect4jTest extends TestCase {
      * EOF
      */
     public void testEof() throws Exception {
-        Expect4j.log.info("\n\n\n\nexpect eof");
+        logger.info("\n\n\n\nexpect eof");
         
         pair = new DelayedPair(testStr, 5, 0); // should hit EOF quickly
         
@@ -208,7 +227,7 @@ public class Expect4jTest extends TestCase {
      * @throws java.lang.Exception
      */
     public void testEofMultiple() throws Exception {
-        Expect4j.log.info("\n\n\n\nexpect eof multiple");
+        logger.info("\n\n\n\nexpect eof multiple");
 
         pair = new DelayedPair(testStr, 1, 1); // should hit EOF quickly
         Expect4j instance = new Expect4j(pair);
@@ -239,12 +258,12 @@ public class Expect4jTest extends TestCase {
         ExpectState state = instance.getLastState(); // From last match to EOF
         String buffer = state.getBuffer();
         String expResult = " the lazy dog";
-        Expect4j.log.info("EOF leftovers " + buffer);
+        logger.info("EOF leftovers " + buffer);
         assertEquals(expResult, buffer);
     }
     
     public void testTimeout() throws Exception {
-        Expect4j.log.info("\n\n\n\nexpect timeout");
+        logger.info("\n\n\n\nexpect timeout");
         
         pair = new DelayedPair(testStr, 1000, 5);
         
@@ -259,13 +278,13 @@ public class Expect4jTest extends TestCase {
         assertEquals(Expect4j.RET_TIMEOUT, index );
         
         long duration = end - start;
-        Expect4j.log.fine(" took " + duration + " seconds");
+        logger.info(" took " + duration + " seconds");
         assertTrue( duration < 3000 ); // less than 2 seconds plus 1 second of cruft
     }
     
     //Timeout Match
     public void testTimeoutMatch() throws Exception {
-        Expect4j.log.info( "expect timeout match");
+        logger.info( "expect timeout match");
         
         pair = new DelayedPair(testStr, 500, 5); //way longer than 3
         Expect4j instance = new Expect4j(pair);
@@ -306,7 +325,7 @@ public class Expect4jTest extends TestCase {
      * Serial matches
      */
     public void testSerialPatterns() throws Exception {
-        Expect4j.log.info( "expect serial patterns");
+        logger.info( "expect serial patterns");
         
         Expect4j instance = new Expect4j(pair);
         instance.setDefaultTimeout(2000); // quicken our testing
@@ -325,7 +344,7 @@ public class Expect4jTest extends TestCase {
     }
     
     public void testArrayArgs() throws Exception {
-        Expect4j.log.info( "expect serial patterns");
+        logger.info( "expect serial patterns");
         Expect4j instance = new Expect4j(pair);
         instance.setDefaultTimeout(2000); // quicken our testing
         

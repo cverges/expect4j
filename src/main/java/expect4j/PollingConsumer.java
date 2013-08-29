@@ -1,35 +1,41 @@
 /*
- * Copyright 2007 Justin Ryan
+ * Copyright (c) 2007 Justin Ryan
+ * Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
 package expect4j;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.io.IOException;
-import java.util.logging.Level;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Responsible for absorbing everything from stream and to maintain a buffer.
  *
  * TODO Rewrite with NIO
  *
- * @author justin
+ * @author Chris Verges
+ * @author Justin Ryan
  */
 public class PollingConsumer extends ConsumerImpl {
+    /**
+     * Interface to the Java 2 platform's core logging facilities.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(PollingConsumer.class);
     
     boolean dirtyBuffer;
     Boolean callerProcessing = Boolean.FALSE;
@@ -50,17 +56,17 @@ public class PollingConsumer extends ConsumerImpl {
         int ioErrorCount = 0;
         Reader reader = pair.getReader();
         
-        log.fine("Starting primary loop");
+        logger.trace("Starting primary loop");
         while ( !stopRequested && !foundEOF && ioErrorCount < 4) {
             try {
-                log.finest("Checking ready");
+                logger.trace("Checking ready");
                 boolean ready = false;
                 try {
                     ready = reader.ready(); // will not block
-                    if( reader.markSupported() ) log.fine("Mark Supported");
+                    if( reader.markSupported() ) logger.trace("Mark Supported");
                 } catch(Exception ioe) {
                     // The Pipe most likely closed on us.
-                    log.log(Level.FINE, "While checking ready", ioe);
+                    logger.debug("Exception in PollingConsumer: " + ioe);
                     foundEOF = true;
                     break;
                 }
@@ -68,29 +74,29 @@ public class PollingConsumer extends ConsumerImpl {
                 //if( !ready ) { ready = true; log.fine("Faking ready"); }
                 
                 if ( ready ) {
-                    log.finest("Is Ready");
+                    logger.trace("Is Ready");
                     
                     
                     // don't modify the buffer while processing is happening
                     // written as while loop to prevent spurious interrupts
                     synchronized(this) {
                         while( callerProcessing.booleanValue() ) {
-                            log.finer("Waiting for caller to finish");
+                            logger.trace("Waiting for caller to finish");
                             try {
                                 wait();
                             } catch(InterruptedException ie) {
-                                log.info("Woken up early");
+                                logger.trace("Woken up early");
                                 continue;
                             }
                         }
                         
-                        log.finer("About to wait for buffer lock");
+                        logger.trace("About to wait for buffer lock");
                         synchronized(buffer) {
                             length = reader.read(cs);
                             
                             if( length == -1 ) { //EOF
-                                log.fine("Found the EOF");
-                                log.fine("Current buffer: " + buffer.toString() );
+                                logger.trace("Found the EOF");
+                                logger.trace("Current buffer: " + buffer.toString() );
                                 foundEOF = true;
                                 dirtyBuffer = true;
                                 break;
@@ -99,10 +105,10 @@ public class PollingConsumer extends ConsumerImpl {
                             String print = new String(cs, 0, length);
                             print = print.replaceAll("\n", "\\\\n");
                             print = print.replaceAll("\r", "\\\\r");
-                            log.finer("Appending >>>" + print + "<<<");
+                            logger.trace("Appending >>>" + print + "<<<");
                             buffer.append( cs, 0, length ); // thread safe
 			    
-			    log.finer("Current Buffer: " + buffer.toString() );
+                            logger.trace("Current Buffer: " + buffer.toString() );
                             dirtyBuffer = true;
                             
                             /**
@@ -114,19 +120,19 @@ public class PollingConsumer extends ConsumerImpl {
                              * buffer.delete(0, BUFFERMAX - buffer.length() );
                              */
                             
-                            log.finest("Waking up who ever if listening");
+                            logger.trace("Waking up who ever if listening");
                             buffer.notify(); // seeing that we read something, wait people up
                         }
                     }
                     
                 } else {
-                    log.finest("Not Ready, sleeping");
+                    logger.trace("Not Ready, sleeping");
                     try { Thread.sleep(500); } catch(InterruptedException ie) { }
-                    log.finest("Done sleeping");
+                    logger.trace("Done sleeping");
                     //continue;
                 }
             }catch(IOException ioe) {
-                log.log(Level.WARNING, "Exception in loop body", ioe);
+                logger.warn("Exception in loop body: " + ioe);
                 ioErrorCount++;
                 //continue;
             }
@@ -137,14 +143,14 @@ public class PollingConsumer extends ConsumerImpl {
             buffer.notify();
         }
         if( stopRequested ) {
-            log.info("Stop Requested");
+            logger.debug("Stop Requested");
             pair.close();
         }
         if ( foundEOF )
-            log.info("Found EOF to stop while loop");
+            logger.debug("Found EOF to stop while loop");
         if( ioErrorCount >= 4 )
-            log.info("ioErrorCount at " + ioErrorCount );
-        log.fine("Leaving primary loop");
+            logger.debug("ioErrorCount at " + ioErrorCount );
+        logger.trace("Leaving primary loop");
     }
     
     /**
@@ -157,17 +163,17 @@ public class PollingConsumer extends ConsumerImpl {
             if( dirtyBuffer )
                 return;
             if( !foundEOF() ) {
-                log.fine("Waiting for things to come in, or until timeout");
+                logger.trace("Waiting for things to come in, or until timeout");
                 try {
                     if( timeoutMilli > 0 )
                         buffer.wait(timeoutMilli);
                     else
                         buffer.wait();
                 } catch(InterruptedException ie) {
-                    log.info("Woken up, while waiting for buffer");
+                    logger.trace("Woken up, while waiting for buffer");
                 }
                 // this might went early, but running the processing again isn't a big deal
-                log.fine("Waited");
+                logger.trace("Waited");
             }
         }
     }
@@ -189,9 +195,9 @@ public class PollingConsumer extends ConsumerImpl {
             // if pause was called, then the main loop should be blocked callerProcessing,
             // and the buffer is safe.
             if( offset >= 0 ) {
-                log.fine("Moving buffer up by " + offset);
+                logger.trace("Moving buffer up by " + offset);
                 StringBuffer smaller = buffer.delete(0, offset + 1);
-                log.fine("New size: " + buffer.length() + " vs " + smaller.length() );
+                logger.trace("New size: " + buffer.length() + " vs " + smaller.length() );
             }
             
             callerProcessing = Boolean.FALSE; // should allow consumer to continue

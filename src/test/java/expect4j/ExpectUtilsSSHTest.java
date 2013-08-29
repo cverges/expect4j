@@ -1,23 +1,41 @@
 /*
- * ExpectUtilsSSHTest.java
- * JUnit based test
+ * Copyright (c) 2007 Justin Ryan
+ * Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
  *
- * Created on March 16, 2007, 9:43 AM
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
 package expect4j;
 
+import expect4j.matches.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import junit.framework.*;
-import expect4j.matches.*;
 import java.util.Date;
+import junit.framework.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * TODO
  *
- * @author justin
+ * @author Chris Verges
+ * @author Justin Ryan
  */
 public class ExpectUtilsSSHTest extends TestCase {
+    /**
+     * Interface to the Java 2 platform's core logging facilities.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(ExpectUtilsSSHTest.class);
     
     public ExpectUtilsSSHTest(String testName) {
         super(testName);
@@ -62,13 +80,12 @@ public class ExpectUtilsSSHTest extends TestCase {
         
         Date result = (Date) expect.getLastState().getVar("timestamp");
         assertNotNull( result );
-        Expect4j.log.fine("Timestamp: " + result);
+        logger.info("Timestamp: " + result);
         
         Date expResult = new Date();
-        Expect4j.log.fine("Timestamp: " + expResult);
+        logger.info("Timestamp: " + expResult);
         assertTrue( result.before(expResult) );
         
         expect.close();
     }
-    
 }

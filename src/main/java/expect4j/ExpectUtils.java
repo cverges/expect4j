@@ -1,50 +1,65 @@
 /*
- * Copyright 2007 Justin Ryan
+ * Copyright (c) 2007 Justin Ryan
+ * Copyright (c) 2013 Chris Verges <chris.verges@gmail.com>
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License.  You may
+ * obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
 package expect4j;
 
 import com.jcraft.jsch.*;
+import expect4j.matches.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.Hashtable;
-import expect4j.matches.*;
 import java.util.logging.*;
-import org.apache.commons.net.telnet.*;
 import org.apache.commons.net.io.*;
+import org.apache.commons.net.telnet.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Utilities functions to help access the expect4j library in the most common
- * ways. This functions can be used directly or used as a model to copy for your
- * own uses.
+ * Utilities functions to help access the Expect4J library in the most
+ * common ways. This functions can be used directly or used as a model
+ * to copy for your own uses.
  *
- * @author justin
+ * @author Chris Verges
+ * @author Justin Ryan
  */
 public abstract class ExpectUtils {
-    static final public java.util.logging.Logger log = java.util.logging.Logger.getLogger(ExpectUtils.class.getName());
+    /**
+     * Interface to the Java 2 platform's core logging facilities.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(ExpectUtils.class);
     
     /**
-     * Simulates: curl http://remotehost/url
+     * Creates an HTTP client connection to a specified HTTP server and
+     * returns the entire response.  This function simulates <code>curl
+     * http://remotehost/url</code>.
+     *
+     * @param remotehost the DNS or IP address of the HTTP server
+     * @param url the path/file of the resource to look up on the HTTP
+     *        server
+     * @return the response from the HTTP server
+     * @throws Exception upon a variety of error conditions
      */
     public static String Http(String remotehost, String url) throws Exception {
         Socket s = null;
         s = new Socket(remotehost, 80);
-        log.fine("Connected to " + s.getInetAddress().toString() );
+        logger.debug("Connected to " + s.getInetAddress().toString() );
 
         if (false) {
-            // for debugging only
+            // for serious connection-oriented debugging only
             PrintWriter out = new PrintWriter(s.getOutputStream(), false);
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
@@ -68,18 +83,19 @@ public abstract class ExpectUtils {
 
         Expect4j expect = new Expect4j(s);
         
+        logger.debug("Sending HTTP request for " + url);
         expect.send("GET " + url + " HTTP/1.1\r\n");
         expect.send("Host: " + remotehost + "\r\n");
         expect.send("Connection: close\r\n");
         expect.send("User-Agent: Expect4j\r\n");
         expect.send("\r\n");
-        log.fine("Sent header info");
         
+        logger.debug("Waiting for HTTP response");
         String remaining = null;
-        expect.expect( new Match[] {
+        expect.expect(new Match[] {
             new RegExpMatch("HTTP/1.[01] \\d{3} (.*)\n?\r", new Closure() {
                 public void run(ExpectState state) {
-                    log.fine("HTTP Header");
+                    logger.trace("Detected HTTP Response Header");
                     
                     // save http code
                     String match = state.getMatch();
@@ -91,18 +107,19 @@ public abstract class ExpectUtils {
             }),
             new RegExpMatch("Content-Type: (.*\\/.*)\r\n", new Closure() {
                 public void run(ExpectState state) {
+                    logger.trace("Detected Content-Type header");
                     state.addVar("contentType", state.getMatch() );
                     state.exp_continue();
                 }
             }),
             new EofMatch( new Closure() { // should cause entire page to be collected
                 public void run(ExpectState state) {
-                    log.fine("Capturing until EOF");
+                    logger.trace("Found EOF, done receiving HTTP response");
                 }
             }), // Will cause buffer to be filled up till end
             new TimeoutMatch(10000, new Closure() {
                 public void run(ExpectState state) {
-                    log.fine("Timeout");
+                    logger.trace("Timeout waiting for HTTP response");
                 }
             })
         });
@@ -112,7 +129,6 @@ public abstract class ExpectUtils {
         String httpCode = (String) expect.getLastState().getVar("httpCode");
 
         String contentType = (String) expect.getLastState().getVar("contentType");
-        log.fine("Content Type: " + contentType );
         
         s.close();
         
@@ -120,24 +136,33 @@ public abstract class ExpectUtils {
     }
     
     /**
-     * Simulates: spawn ssh $remote_server
+     * Creates an SSH session to the given server on TCP port 22 using
+     * the provided credentials.  This is equivalent to Expect's
+     * <code>spawn ssh $hostname</code>.
+     *
+     * @param hostname the DNS or IP address of the remote server
+     * @param username the account name to use when authenticating
+     * @param password the account password to use when authenticating
+     * @throws Exception on a variety of errors
      */
     public static Expect4j SSH(String hostname, String username, String password) throws Exception {
         return SSH(hostname, username, password, 22);
     }
     
     public static Expect4j SSH(String hostname, String username, String password, int port) throws Exception {
-        JSch jsch=new JSch();
+        logger.debug("Creating SSH session with " + hostname + ":" + port + " as " + username);
+
+        JSch jsch = new JSch();
         
         //jsch.setKnownHosts("/home/foo/.ssh/known_hosts");
         
         Session session=jsch.getSession(username, hostname, port);
-        if( password != null) {
-            log.finer("Using password");
+        if (password != null) {
+            logger.trace("Setting the Jsch password to the one provided (not shown)");
             session.setPassword(password);
         }
         
-        java.util.Hashtable config=new java.util.Hashtable();
+        java.util.Hashtable config = new java.util.Hashtable();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
         session.setDaemonThread(true);
@@ -156,10 +181,9 @@ public abstract class ExpectUtils {
         
         Expect4j expect = new Expect4j(channel.getInputStream(), channel.getOutputStream());
         
-        channel.connect(5*1000);
+        channel.connect(5 * 1000);
         
         return expect;
-        
     }
     
     /**
@@ -185,7 +209,8 @@ public abstract class ExpectUtils {
             public void close() {
                 //super.close();
                 try {
-                    if( client != null ) client.disconnect();
+                    if (client != null)
+                        client.disconnect();
                 }catch(IOException ioe) {
                     
                 }
