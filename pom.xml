@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.google.p.expect4j</groupId>
+    <groupId>com.github.cverges.expect4j</groupId>
     <artifactId>expect4j</artifactId>
     <version>1.1</version>
     <packaging>jar</packaging>
@@ -23,6 +23,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <log4j.version>2.0-beta8</log4j.version>
+        <!-- the following is used in conjunction with the expect4j-mvn project -->
+        <internal.repo.path>file:///home/cverges/expect4j-mvn</internal.repo.path>
     </properties>
 
     <repositories>
@@ -109,6 +111,14 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>internal.repo</id>
+            <name>Internal Repository</name>
+            <url>${internal.repo.path}</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
