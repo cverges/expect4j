@@ -1,12 +1,5 @@
 # Expect4J
 
-## Copyright and Licensing
-
-Copyright &copy; 2007 Justin Ryan  
-Copyright &copy; 2013 Chris Verges &lt;chris.verges@gmail.com&gt;
-
-Licensed under the terms of the Apache Public License v2.0.
-
 ## Overview
 
 A powerful feature of Tcl has always been its integration with the
@@ -51,3 +44,10 @@ cd expect4j/
 # Build everything via maven
 mvn clean install
 ```
+
+## Copyright and Licensing
+
+Copyright &copy; 2007 Justin Ryan  
+Copyright &copy; 2013 Chris Verges &lt;chris.verges@gmail.com&gt;
+
+Licensed under the terms of the Apache Public License v2.0.
