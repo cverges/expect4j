@@ -35,8 +35,46 @@ import org.slf4j.LoggerFactory;
  * Expect implementation.  A variety of {@link Match}ers with associated
  * {@link Closure}s may be used to implement complex Expect parsers.
  * <p>
- * TODO: code example here
- * <p>
+ * <pre>
+ * import expect4j.Expect4j;
+ * import java.io.InputStream;
+ * import java.io.OutputStream;
+ *
+ * InputStream is = ...;
+ * OutputStream os = ...;
+ *
+ * Expect4j expect = new Expect4j(is, os);
+ * expect.setDefaultTimeout(10 * 1000);
+ *
+ * final StringBuffer someTextBuffer = new StringBuffer();
+ * 
+ * expect.expect(new Match[] {
+ *     new GlobMatch("text defined as a glob pattern", new Closure() {
+ *         public void run(ExpectState state) {
+ *             state.addVar("found-glob", "true");
+ *             state.exp_continue();
+ *         }
+ *     }),
+ *     new RegExpMatch("(uses)? PERL(\\d+) regular expressions", new Closure() {
+ *         public void run(ExpectState state) {
+ *             someTextBuffer.append(state.getMatch(2));
+ *             state.exp_continue_reset_timer();
+ *         }
+ *     }),
+ *     new EofMatch(new Closure() {
+ *         public void run(ExpectState state) {
+ *             state.addVar("eof-found", "true");
+ *         }
+ *     }),
+ *     new TimeoutMatch(new Closure() {
+ *         public void run(ExpectState state) {
+ *             state.addVar("timed-out", "true");
+ *         }
+ *     })
+ * });
+ *
+ * Boolean eofFound = new Boolean( (String)expect.getLastState().getVar("eof-found") );
+ * String someText = someTextBuffer.toString();</pre>
  * This implementation currently does not provide matching
  * <code>interact</code> functionality.
  *
