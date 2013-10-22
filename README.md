@@ -45,6 +45,12 @@ cd expect4j/
 mvn clean install
 ```
 
+## Questions?
+
+Have questions about Expect4J?  Please join our users group at
+https://groups.google.com/forum/#!forum/expect4j-users to ask your
+questions and get help from other Expect4J users.
+
 ## Copyright and Licensing
 
 Copyright &copy; 2007 Justin Ryan  
