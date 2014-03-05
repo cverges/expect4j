@@ -34,11 +34,10 @@ public interface Consumer extends Runnable {
     public void run();
 
     /**
-     * TODO
+     * TODO: what if something came in between when we last checked and
+     *       when this method is called
      *
      * @param timeout timeout in milliseconds
-     * @TODO what is something came in between when we last checked and
-     *       when this method is called
      */
     public void waitForBuffer(long timeout);
 

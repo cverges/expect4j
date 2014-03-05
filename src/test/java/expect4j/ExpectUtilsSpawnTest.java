@@ -17,11 +17,25 @@
 
 package expect4j;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import expect4j.matches.*;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
+
 import junit.framework.*;
+
+import org.apache.commons.lang3.SystemUtils;
+
+import org.junit.After;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,47 +45,19 @@ import org.slf4j.LoggerFactory;
  * @author Chris Verges
  * @author Justin Ryan
  */
-public class ExpectUtilsSpawnTest extends TestCase {
-    /**
-     * Interface to the Java 2 platform's core logging facilities.
-     */
+public class ExpectUtilsSpawnTest {
     private static final Logger logger = LoggerFactory.getLogger(ExpectUtilsSpawnTest.class);
     
-    public ExpectUtilsSpawnTest(String testName) {
-        super(testName);
-    }
-    
-    protected void setUp() throws Exception {
-    }
-    
-    protected void tearDown() throws Exception {
-    }
+    @Test
+    public void testSpawnOnUnixLinux() throws Exception {
+        System.out.println("spawn (unix/linux test variant)");
 
-    /**
-     * Test of spawn method, of class expect4j.ExpectUtils.
-     */
-    public void testSpawn() throws Exception {
-        System.out.println("spawn");
+        Assume.assumeThat("This test variant is only intended for Unix/Linux systems", SystemUtils.IS_OS_UNIX || SystemUtils.IS_OS_LINUX, is(true));
 
-        String executable;
-        String expResult;
-        Expect4j expect;
-
-        if (OperatingSystem.isWindows()) {
-            System.out.println("Using Windows test");
-            executable = "cmd /c net statistics Workstation";
-            expResult = "Workstation Statistics";
-        } else if (OperatingSystem.isUnix()) {
-            System.out.println("Using Unix/Linux test");
-            executable = "ifconfig";
-            expResult = "Local Loopback";
-        } else {
-            System.err.println("Your OS is not supported for this test!");
-            assertEquals(0, 1);
-            return;
-        }
+        final String executable = "ifconfig";
+        final String expResult = "Local Loopback";
         
-        expect = ExpectUtils.spawn(executable);
+        final Expect4j expect = ExpectUtils.spawn(executable);
         expect.setDefaultTimeout( 5000 );
      
         // Don't have to do anything, since the match will be saved
@@ -81,74 +67,146 @@ public class ExpectUtilsSpawnTest extends TestCase {
         String result = expect.getLastState().getMatch();
         assertEquals(expResult, result);
 
-        if (OperatingSystem.isWindows()) {
-            final StringBuffer receivedStr = new StringBuffer();
-            final StringBuffer transmittedStr = new StringBuffer();
-         
-            ArrayList matches = new ArrayList();
-            matches.add( new RegExpMatch("Bytes received\\s*(\\d+)\\r\\n", new Closure() {
-                public void run(ExpectState state) {
-                    receivedStr.append( state.getMatch(1) );
-                    state.exp_continue();
-                }
-            }) );
-            matches.add( new RegExpMatch("Bytes transmitted\\s*(\\d+)\\r\\n", new Closure() {
-                public void run(ExpectState state) {
-                    transmittedStr.append( state.getMatch(1) );
-                    state.exp_continue();
-                }
-            }) );
-            index = expect.expect( matches );
-         
-            long received = 0;
-            try {
-                received = Long.valueOf( receivedStr.toString() ).longValue();
-            } catch (Exception e) {
-                logger.warn("Received " + e);
-            }
-            assertTrue( received > 0 );
-         
-            long transmitted = 0;
-            try {
-                transmitted = Long.valueOf( transmittedStr.toString() ).longValue();
-            } catch(Exception e) {
-                logger.warn("Transmitted" + e);
-            }
-            assertTrue( transmitted > 0 );
-        } else if (OperatingSystem.isUnix()) {
-            final StringBuffer rxStr = new StringBuffer();
-            final StringBuffer txStr = new StringBuffer();
+        final StringBuffer rxStr = new StringBuffer();
+        final StringBuffer txStr = new StringBuffer();
 
-            ArrayList matches = new ArrayList();
-            matches.add(new RegExpMatch("RX bytes:(\\d+)", new Closure() {
-                public void run(ExpectState state) {
-                    rxStr.append(state.getMatch(1));
-                    state.exp_continue();
-                }
-            }));
-            matches.add(new RegExpMatch("TX bytes:(\\d+)", new Closure() {
-                public void run(ExpectState state) {
-                    txStr.append(state.getMatch(1));
-                    state.exp_continue();
-                }
-            }));
-            index = expect.expect(matches);
-
-            long received = 0;
-            try {
-                received = Long.valueOf(rxStr.toString()).longValue();
-            } catch (Exception e) {
-                logger.warn("Received " + e);
+        ArrayList matches = new ArrayList();
+        matches.add(new RegExpMatch("RX bytes:(\\d+)", new Closure() {
+            public void run(ExpectState state) {
+                rxStr.append(state.getMatch(1));
+                state.exp_continue();
             }
-            assertTrue(received > 0);
-
-            long transmitted = 0;
-            try {
-                transmitted = Long.valueOf(txStr.toString()).longValue();
-            } catch (Exception e) {
-                logger.warn("Transmitted" + e);
+        }));
+        matches.add(new RegExpMatch("TX bytes:(\\d+)", new Closure() {
+            public void run(ExpectState state) {
+                txStr.append(state.getMatch(1));
+                state.exp_continue();
             }
-            assertTrue(transmitted > 0);
+        }));
+        index = expect.expect(matches);
+
+        long received = 0;
+        try {
+            received = Long.valueOf(rxStr.toString()).longValue();
+        } catch (Exception e) {
+            logger.warn("Received " + e);
         }
+        assertTrue(received > 0);
+
+        long transmitted = 0;
+        try {
+            transmitted = Long.valueOf(txStr.toString()).longValue();
+        } catch (Exception e) {
+            logger.warn("Transmitted" + e);
+        }
+        assertTrue(transmitted > 0);
+    }
+
+    @Test
+    public void testSpawnOnWindows() throws Exception {
+        System.out.println("spawn (windows test variant)");
+
+        Assume.assumeThat("This test variant is only intended for Windows systems", SystemUtils.IS_OS_WINDOWS, is(true));
+
+        final String executable = "cmd /c net statistics Workstation";
+        final String expResult = "Workstation Statistics";
+        
+        final Expect4j expect = ExpectUtils.spawn(executable);
+        expect.setDefaultTimeout( 5000 );
+     
+        // Don't have to do anything, since the match will be saved
+        int index = expect.expect(expResult);
+        assertEquals(0, index);
+     
+        String result = expect.getLastState().getMatch();
+        assertEquals(expResult, result);
+
+        final StringBuffer receivedStr = new StringBuffer();
+        final StringBuffer transmittedStr = new StringBuffer();
+     
+        ArrayList matches = new ArrayList();
+        matches.add( new RegExpMatch("Bytes received\\s*(\\d+)\\r\\n", new Closure() {
+            public void run(ExpectState state) {
+                receivedStr.append( state.getMatch(1) );
+                state.exp_continue();
+            }
+        }) );
+        matches.add( new RegExpMatch("Bytes transmitted\\s*(\\d+)\\r\\n", new Closure() {
+            public void run(ExpectState state) {
+                transmittedStr.append( state.getMatch(1) );
+                state.exp_continue();
+            }
+        }) );
+        index = expect.expect( matches );
+     
+        long received = 0;
+        try {
+            received = Long.valueOf( receivedStr.toString() ).longValue();
+        } catch (Exception e) {
+            logger.warn("Received " + e);
+        }
+        assertTrue( received > 0 );
+     
+        long transmitted = 0;
+        try {
+            transmitted = Long.valueOf( transmittedStr.toString() ).longValue();
+        } catch(Exception e) {
+            logger.warn("Transmitted" + e);
+        }
+        assertTrue( transmitted > 0 );
+    }
+
+    @Test
+    public void testSpawnOnMacOSX() throws Exception {
+        System.out.println("spawn (mac os x test variant)");
+
+        Assume.assumeThat("This test variant is only intended for Mac OS X systems", SystemUtils.IS_OS_MAC_OSX, is(true));
+
+        final String executable = "ifconfig lo0";
+        final String expResult = "LOOPBACK";
+        
+        final Expect4j expect = ExpectUtils.spawn(executable);
+        expect.setDefaultTimeout( 5000 );
+     
+        // Don't have to do anything, since the match will be saved
+        int index = expect.expect(expResult);
+        assertEquals(0, index);
+     
+        String result = expect.getLastState().getMatch();
+        assertEquals(expResult, result);
+
+        final StringBuffer mtuStr = new StringBuffer();
+        final StringBuffer flagsStr = new StringBuffer();
+     
+        ArrayList matches = new ArrayList();
+        matches.add( new RegExpMatch("mtu (\\d+)", new Closure() {
+            public void run(ExpectState state) {
+                mtuStr.append( state.getMatch(1) );
+                state.exp_continue();
+            }
+        }) );
+        matches.add( new RegExpMatch("flags=(\\d+)", new Closure() {
+            public void run(ExpectState state) {
+                flagsStr.append( state.getMatch(1) );
+                state.exp_continue();
+            }
+        }) );
+        index = expect.expect( matches );
+     
+        long mtu = 0;
+        try {
+            mtu = Long.valueOf( mtuStr.toString() ).longValue();
+        } catch (Exception e) {
+            logger.warn("MTU " + e);
+        }
+        assertTrue( mtu > 0 );
+     
+        long flags = 0;
+        try {
+            flags = Long.valueOf( flagsStr.toString() ).longValue();
+        } catch(Exception e) {
+            logger.warn("Flags " + e);
+        }
+        assertTrue( flags > 0 );
     }
 }

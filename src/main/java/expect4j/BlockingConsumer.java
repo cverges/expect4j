@@ -63,8 +63,8 @@ public class BlockingConsumer extends ConsumerImpl {
     /**
      * Starts the <code>BlockingConsumer</code> in processing the reader
      * stream.
-     *
-     * @TODO Handle timeout of zero to expect, that shouldn't wait
+     * <p>
+     * TODO: Handle timeout of zero to expect, that shouldn't wait
      */
     public void run() {
         logger.trace("BlockingConsumer " + this + " starting data processing");
@@ -141,11 +141,10 @@ public class BlockingConsumer extends ConsumerImpl {
     }
 
     /**
-     * TODO
+     * TODO: what if something came in between when we last checked and
+     *       when this method is called
      *
      * @param timeout timeout in milliseconds
-     * @TODO what is something came in between when we last checked and
-     *       when this method is called
      */
     public void waitForBuffer(long timeout) {
         if (foundEOF) {

@@ -75,12 +75,14 @@ import org.slf4j.LoggerFactory;
  *
  * Boolean eofFound = new Boolean( (String)expect.getLastState().getVar("eof-found") );
  * String someText = someTextBuffer.toString();</pre>
+ *
  * This implementation currently does not provide matching
  * <code>interact</code> functionality.
+ * <p>
+ * TODO: "expect eof"
  *
  * @author Chris Verges
  * @author Justin Ryan
- * @TODO "expect eof"
  */
 public class Expect4j {
     /**
@@ -207,12 +209,13 @@ public class Expect4j {
     /**
      * Passes data to the writer stream for remote execution.  This
      * function simulates the Expect <code>exp_send</code> function.
+     * <p>
+     * TODO: might have to strip <code>\n</code> and replace with
+     *       <code>\r</code>
      *
      * @param data the data to pass to the writer
      * @throws IOException if an error occurs with the writer stream
      * @see <a href="http://wiki.tcl.tk/14317">http://wiki.tcl.tk/14317</a>
-     * @TODO might have to strip <code>\n</code> and replace with
-     *       <code>\r</code>
      */
     public void send(String data) throws IOException {
         consumer.send(data);
@@ -665,9 +668,10 @@ public class Expect4j {
 
     /**
      * Changes the default timeout value for the Expect4j instance.
+     * <p>
+     * TODO: Check for valid values
      *
      * @param timeout the new timeout value in milliseconds
-     * @TODO Check for valid values
      */
     public void setDefaultTimeout(long timeout) {
         logger.debug("Setting default timeout to " + timeout);
