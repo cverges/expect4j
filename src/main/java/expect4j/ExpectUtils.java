@@ -143,12 +143,25 @@ public abstract class ExpectUtils {
      * @param hostname the DNS or IP address of the remote server
      * @param username the account name to use when authenticating
      * @param password the account password to use when authenticating
+     * @return the controlling Expect4j instance
      * @throws Exception on a variety of errors
      */
     public static Expect4j SSH(String hostname, String username, String password) throws Exception {
         return SSH(hostname, username, password, 22);
     }
     
+    /**
+     * Creates an SSH session to the given server on a custom TCP port
+     * using the provided credentials.  This is equivalent to Expect's
+     * <code>spawn ssh $hostname</code>.
+     *
+     * @param hostname the DNS or IP address of the remote server
+     * @param username the account name to use when authenticating
+     * @param password the account password to use when authenticating
+     * @param port the TCP port for the SSH service
+     * @return the controlling Expect4j instance
+     * @throws Exception on a variety of errors
+     */
     public static Expect4j SSH(String hostname, String username, String password, int port) throws Exception {
         logger.debug("Creating SSH session with " + hostname + ":" + port + " as " + username);
 
@@ -217,7 +230,6 @@ public abstract class ExpectUtils {
             }
         };
                 
-        
         /*
         URL url=new URL("telnet", hostname, port, "",  new thor.net.URLStreamHandler());
         final URLConnection urlConnection=url.openConnection();
@@ -260,13 +272,69 @@ public abstract class ExpectUtils {
     }
     */
 
+    /**
+     * Spawns a local process with the input/output streams controlled
+     * via Expect4J.  The command line provided is broken into multiple
+     * arguments by whitespace.
+     *
+     * @param cmdLine a specified system command
+     * @return the controlling Expect4j instance
+     * @see Runtime#exec(String)
+     */
     public static Expect4j spawn(String cmdLine) throws Exception {
-        String[] cmdArgs = cmdLine.split(" ");
-        return spawn(cmdArgs);
+        return spawn(cmdLine, null);
     }
 
+    /**
+     * Spawns a local process with the input/output streams controlled
+     * via Expect4J.  The command line provided is broken into multiple
+     * arguments by whitespace.
+     *
+     * @param cmdLine a specified system command
+     * @param envParams array of strings, each element of which has
+     *                  environment variable settings in the format
+     *                  <i>name=value</i>, or {@code null} if the
+     *                  subprocess should inherit the environment of the
+     *                  current process.
+     * @return the controlling Expect4j instance
+     * @see Runtime#exec(String, String[])
+     */
+    public static Expect4j spawn(String cmdLine, String[] envParams) throws Exception {
+        String[] cmdArgs = cmdLine.split(" ");
+        return spawn(cmdArgs, envParams);
+    }
+
+    /**
+     * Spawns a local process with the input/output streams controlled
+     * via Expect4J.  The command line arguments are provided in a
+     * pre-split manner.
+     *
+     * @param cmdArgs array containing the command to call and its
+     *                arguments.
+     * @return the controlling Expect4j instance
+     * @see Runtime#exec(String[])
+     */
     public static Expect4j spawn(String cmdArgs[]) throws Exception {
-        Process process = Runtime.getRuntime().exec(cmdArgs);
+        return spawn(cmdArgs, null);
+    }
+
+    /**
+     * Spawns a local process with the input/output streams controlled
+     * via Expect4J.  The command line arguments are provided in a
+     * pre-split manner.
+     *
+     * @param cmdArgs array containing the command to call and its
+     *                arguments.
+     * @param envParams array of strings, each element of which has
+     *                  environment variable settings in the format
+     *                  <i>name=value</i>, or {@code null} if the
+     *                  subprocess should inherit the environment of the
+     *                  current process.
+     * @return the controlling Expect4j instance
+     * @see Runtime#exec(String[], String[])
+     */
+    public static Expect4j spawn(String cmdArgs[], String[] envParams) throws Exception {
+        Process process = Runtime.getRuntime().exec(cmdArgs, envParams);
         Expect4j expect = new Expect4j(process);
         return expect;
     }
