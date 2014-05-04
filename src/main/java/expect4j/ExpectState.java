@@ -17,7 +17,10 @@
 
 package expect4j;
 
+import expect4j.matches.EofMatch;
+
 import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,12 +160,28 @@ public class ExpectState {
     protected String buffer;
 
     /**
-     * Returns the entire reader buffer.  This is equivalent to Expect's
-     * <code>expect_out(buffer)</code>.
+     * Returns all of the matched characters plus the characters that
+     * came earlier but did not match.
+     * <p>
+     * This is equivalent to Expect's {@code expect_out(buffer)}, as
+     * documented in the <i>Exploring Expect</i> book from O'Reilly:
+     * <blockquote>
+     *     All of the matched characters plus the characters that came
+     *     earlier but did not match are stored in a variable called
+     *     <i>expect_out(buffer)</i>.
+     * </blockquote>
+     * <p>
+     * This can be used in conjunction with
+     * {@link Expect4j#getLastState} to get all the output in the buffer
+     * between the last match and {@link EofMatch} after Expect4j has
+     * finished processing a stream.
      *
      * @return the entire reader buffer.
+     * @see <a href="http://oreilly.com/catalog/expect/chapter/ch03.html">Exploring Expect - Getting Started with Expect - The expect command</a>
      */
-    public String getBuffer() { return buffer; }
+    public String getBuffer() {
+        return buffer;
+    }
     
     /**
      * Sets the reader buffer.
