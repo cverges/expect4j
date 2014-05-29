@@ -4,7 +4,7 @@
 
     <groupId>com.github.cverges.expect4j</groupId>
     <artifactId>expect4j</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5</version>
     <packaging>jar</packaging>
     <name>expect4j</name>
     <url>http://github.com/cverges/expect4j</url>
@@ -38,7 +38,7 @@
         <connection>scm:git:git://github.com/cverges/expect4j.git</connection>
         <developerConnection>scm:git:git@github.com:cverges/expect4j.git</developerConnection>
         <url>http://github.com/cverges/expect4j</url>
-      <tag>HEAD</tag>
+      <tag>expect4j-1.5</tag>
   </scm>
 
     <developers>
