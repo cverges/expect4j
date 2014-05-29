@@ -19,6 +19,12 @@
         </license>
     </licenses>
 
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -29,8 +35,31 @@
         <internal.repo.path>file:///home/cverges/expect4j-mvn</internal.repo.path>
     </properties>
 
+    <scm>
+        <connection>scm:git:git://github.com/cverges/expect4j.git</connection>
+        <developerConnection>scm:git:git@github.com:cverges/expect4j.git</developerConnection>
+        <url>http://github.com/cverges/expect4j</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>quidryan</id>
+            <name>Justin Ryan</name>
+            <email>quidryan@gmail.com</email>
+        </developer>
+        <developer>
+            <id>kg4ysn</id>
+            <name>Chris Verges</name>
+            <email>kg4ysn@gmail.com</email>
+        </developer>
+    </developers>
+
     <repositories>
-        <!-- tcljava is provided by SpringSource -->
+        <!--
+            The latest tcljava is provided by SpringSource.  The version
+            on Maven Central is now deprecated, and new versions are not
+            being suched to Maven Central any longer.
+        -->
         <repository>
             <id>com.springsource.repository.bundles.release</id>
             <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
@@ -138,6 +167,27 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
