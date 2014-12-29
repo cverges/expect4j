@@ -169,7 +169,7 @@ public abstract class ExpectUtils {
         
         //jsch.setKnownHosts("/home/foo/.ssh/known_hosts");
         
-        Session session=jsch.getSession(username, hostname, port);
+        final Session session = jsch.getSession(username, hostname, port);
         if (password != null) {
             logger.trace("Setting the Jsch password to the one provided (not shown)");
             session.setPassword(password);
@@ -192,7 +192,12 @@ public abstract class ExpectUtils {
         //env.put("LANG", "ja_JP.eucJP");
         channel.setEnv(env);
         
-        Expect4j expect = new Expect4j(channel.getInputStream(), channel.getOutputStream());
+        Expect4j expect = new Expect4j(channel.getInputStream(), channel.getOutputStream()) {
+            public void close() {
+                super.close();
+                session.disconnect();
+            }
+        };
         
         channel.connect(5 * 1000);
         
@@ -218,18 +223,6 @@ public abstract class ExpectUtils {
         InputStream is =  new FromNetASCIIInputStream( client.getInputStream() ); // null until client connected
         OutputStream os = new ToNetASCIIOutputStream( client.getOutputStream() );
         
-        StreamPair pair = new StreamPair(is, os) {
-            public void close() {
-                //super.close();
-                try {
-                    if (client != null)
-                        client.disconnect();
-                }catch(IOException ioe) {
-                    
-                }
-            }
-        };
-                
         /*
         URL url=new URL("telnet", hostname, port, "",  new thor.net.URLStreamHandler());
         final URLConnection urlConnection=url.openConnection();
@@ -246,9 +239,17 @@ public abstract class ExpectUtils {
             }
         };
          */
-        Expect4j expect4j = new Expect4j(pair);
-        
-        return expect4j;
+
+        return new Expect4j(is, os) {
+            public void close() {
+                super.close();
+                try {
+                    client.disconnect();
+                } catch (IOException e) {
+                    logger.error("Failed to close telnet session", e);
+                }
+            }
+        };
     }
     
     /*
