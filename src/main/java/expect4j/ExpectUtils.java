@@ -189,8 +189,8 @@ public abstract class ExpectUtils {
             logger.trace("Setting the Jsch password to the one provided (not shown)");
             session.setPassword(password);
         }
-        
-        java.util.Hashtable config = new java.util.Hashtable();
+
+        java.util.Hashtable<String, String> config = new java.util.Hashtable<>();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
         session.setDaemonThread(true);
@@ -202,11 +202,9 @@ public abstract class ExpectUtils {
         //channel.setOutputStream(System.out);
 
         channel.setPtyType("vt102");
-        
-        Hashtable env=new Hashtable();
-        //env.put("LANG", "ja_JP.eucJP");
-        channel.setEnv(env);
-        
+
+        //channel.setEnv("LANG", "ja_JP.eucJP");
+
         Expect4j expect = new Expect4j(channel.getInputStream(), channel.getOutputStream()) {
             public void close() {
                 super.close();
