@@ -201,7 +201,7 @@
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
-            </plugins>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
