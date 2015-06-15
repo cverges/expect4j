@@ -41,7 +41,7 @@ public abstract class ExpectUtils {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(ExpectUtils.class);
-    
+
     /**
      * Creates an HTTP client connection to a specified HTTP server and
      * returns the entire response.  This function simulates <code>curl
@@ -54,8 +54,23 @@ public abstract class ExpectUtils {
      * @throws Exception upon a variety of error conditions
      */
     public static String Http(String remotehost, String url) throws Exception {
+        return Http(remotehost, 80, url);
+    }
+
+    /**
+     * Creates an HTTP client connection to a specified HTTP server and
+     * returns the entire response.  This function simulates <code>curl
+     * http://remotehost/url</code>.
+     *
+     * @param remotehost the DNS or IP address of the HTTP server
+     * @param url the path/file of the resource to look up on the HTTP
+     *        server
+     * @return the response from the HTTP server
+     * @throws Exception upon a variety of error conditions
+     */
+    public static String Http(String remotehost, int port, String url) throws Exception {
         Socket s = null;
-        s = new Socket(remotehost, 80);
+        s = new Socket(remotehost, port);
         logger.debug("Connected to " + s.getInetAddress().toString() );
 
         if (false) {
@@ -82,25 +97,25 @@ public abstract class ExpectUtils {
         }
 
         Expect4j expect = new Expect4j(s);
-        
+
         logger.debug("Sending HTTP request for " + url);
         expect.send("GET " + url + " HTTP/1.1\r\n");
         expect.send("Host: " + remotehost + "\r\n");
         expect.send("Connection: close\r\n");
         expect.send("User-Agent: Expect4j\r\n");
         expect.send("\r\n");
-        
+
         logger.debug("Waiting for HTTP response");
         String remaining = null;
         expect.expect(new Match[] {
             new RegExpMatch("HTTP/1.[01] \\d{3} (.*)\n?\r", new Closure() {
                 public void run(ExpectState state) {
                     logger.trace("Detected HTTP Response Header");
-                    
+
                     // save http code
                     String match = state.getMatch();
                     String parts[] = match.split(" ");
-                    
+
                     state.addVar("httpCode", parts[1]);
                     state.exp_continue();
                 }
@@ -123,18 +138,18 @@ public abstract class ExpectUtils {
                 }
             })
         });
-        
+
         remaining = expect.getLastState().getBuffer(); // from EOF matching
-        
+
         String httpCode = (String) expect.getLastState().getVar("httpCode");
 
         String contentType = (String) expect.getLastState().getVar("contentType");
-        
+
         s.close();
-        
+
         return remaining;
     }
-    
+
     /**
      * Creates an SSH session to the given server on TCP port 22 using
      * the provided credentials.  This is equivalent to Expect's
@@ -149,7 +164,7 @@ public abstract class ExpectUtils {
     public static Expect4j SSH(String hostname, String username, String password) throws Exception {
         return SSH(hostname, username, password, 22);
     }
-    
+
     /**
      * Creates an SSH session to the given server on a custom TCP port
      * using the provided credentials.  This is equivalent to Expect's
@@ -166,9 +181,9 @@ public abstract class ExpectUtils {
         logger.debug("Creating SSH session with " + hostname + ":" + port + " as " + username);
 
         JSch jsch = new JSch();
-        
+
         //jsch.setKnownHosts("/home/foo/.ssh/known_hosts");
-        
+
         final Session session = jsch.getSession(username, hostname, port);
         if (password != null) {
             logger.trace("Setting the Jsch password to the one provided (not shown)");
@@ -180,12 +195,12 @@ public abstract class ExpectUtils {
         session.setConfig(config);
         session.setDaemonThread(true);
         session.connect(3 * 1000);   // making a connection with timeout.
-        
+
         ChannelShell channel = (ChannelShell) session.openChannel("shell");
-        
+
         //channel.setInputStream(System.in);
         //channel.setOutputStream(System.out);
-        
+
         channel.setPtyType("vt102");
         
         Hashtable env=new Hashtable();
@@ -198,12 +213,12 @@ public abstract class ExpectUtils {
                 session.disconnect();
             }
         };
-        
+
         channel.connect(5 * 1000);
-        
+
         return expect;
     }
-    
+
     /**
      * TODO Simulate "Could not open connection to the host, on port...."
      * TODO Simulate "Connection refused"
@@ -211,18 +226,18 @@ public abstract class ExpectUtils {
     public static Expect4j telnet(String hostname, int port) throws Exception {
         // This library has trouble with EOF
         final TelnetClient client = new TelnetClient();
-        
+
         TerminalTypeOptionHandler ttopt = new TerminalTypeOptionHandler("VT100", false, false, true, true);
         EchoOptionHandler echoopt = new EchoOptionHandler(true, false, true, false);
         SuppressGAOptionHandler gaopt = new SuppressGAOptionHandler(false, false, false, false);
         client.addOptionHandler( ttopt );
         client.addOptionHandler( echoopt );
         client.addOptionHandler( gaopt );
-        
+
         client.connect(hostname, port);
         InputStream is =  new FromNetASCIIInputStream( client.getInputStream() ); // null until client connected
         OutputStream os = new ToNetASCIIOutputStream( client.getOutputStream() );
-        
+
         /*
         URL url=new URL("telnet", hostname, port, "",  new thor.net.URLStreamHandler());
         final URLConnection urlConnection=url.openConnection();
@@ -232,7 +247,7 @@ public abstract class ExpectUtils {
         }
         OutputStream os=urlConnection.getOutputStream();
         InputStream is=urlConnection.getInputStream();
-         
+
         StreamPair pair = new StreamPair(is, os) {
             public void close() {
                 try { ((TelnetURLConnection)urlConnection).disconnect(); }catch(Exception e) { }
@@ -251,7 +266,7 @@ public abstract class ExpectUtils {
             }
         };
     }
-    
+
     /*
     class SimpleTelnetTerminalHandler extends DefaultTelnetTerminalHandler implements TelnetConstants {
         public void LineFeed() {
