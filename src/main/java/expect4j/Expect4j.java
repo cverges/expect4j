@@ -733,4 +733,24 @@ public class Expect4j {
         logger.debug("Stopping processing of the reader/writer streams by the Expect4j instance" + this);
         consumer.stop();
     }
+
+    /**
+     * Registers a change logger that is called whenever an input change
+     * is recorded to the buffer.
+     *
+     * @param logger the logger that is called
+     */
+    public void registerBufferChangeLogger(final BufferChangeLogger logger) {
+        consumer.registerBufferChangeLogger(logger);
+    }
+
+    /**
+     * Unregisters the change logger specified.  Once called, this
+     * change logger will not receive any further updates.
+     *
+     * @param logger the logger that is called
+     */
+    public void unregisterBufferChangeLogger(final BufferChangeLogger logger) {
+        consumer.unregisterBufferChangeLogger(logger);
+    }
 }

@@ -122,6 +122,11 @@ public class PollingConsumer extends ConsumerImpl {
                             
                             logger.trace("Waking up who ever if listening");
                             buffer.notify(); // seeing that we read something, wait people up
+
+                            // We explicitly call this after appending to the
+                            // buffer, just in case one of the BufferChangeLoggers
+                            // accidentally modifies the character buffer.
+                            notifyBufferChange(cs, length);
                         }
                     }
                     

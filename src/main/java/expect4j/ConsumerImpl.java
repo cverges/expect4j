@@ -17,8 +17,12 @@
 
 package expect4j;
 
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +65,23 @@ public abstract class ConsumerImpl implements Consumer {
     boolean foundEOF = false;
     
     /**
+     * A collection of BufferChangeLogger objects that are notified
+     * whenever an input change is recorded to this consumer.  When
+     * iterating over this collection, make sure to manually synchronize
+     * prior to using an Iterator:
+     *
+     * <pre>
+     * synchronized (bufferChangeLoggers) {
+     *     Iterator iterator = bufferChangeLoggers.iterator();
+     *     while (iterator.hasNext()) {
+     *         iterator.hasNext().bufferChanged(newData, numChars);
+     *     }
+     * }
+     * </pre>
+     */
+    Collection<BufferChangeLogger> bufferChangeLoggers;
+
+    /**
      * Creates a <code>ConsumerImpl</code> instance based on an
      * {@link IOPair} concrete instance.
      *
@@ -70,6 +91,7 @@ public abstract class ConsumerImpl implements Consumer {
     public ConsumerImpl(IOPair pair) {
         this.pair = pair;
         buffer = new StringBuffer();
+        bufferChangeLoggers = Collections.synchronizedCollection(new TreeSet<BufferChangeLogger>());
     }
     
     /**
@@ -121,5 +143,36 @@ public abstract class ConsumerImpl implements Consumer {
      */
     public boolean foundEOF() {
         return foundEOF;
+    }
+
+    @Override
+    public void registerBufferChangeLogger(final BufferChangeLogger logger) {
+        boolean addedNewLogger = bufferChangeLoggers.add(logger);
+        if (addedNewLogger == false) {
+            this.logger.warn("Asked to register an already-registered logger, skipping duplicate request");
+        }
+    }
+
+    @Override
+    public void unregisterBufferChangeLogger(final BufferChangeLogger logger) {
+        boolean removedLogger = bufferChangeLoggers.remove(logger);
+        if (removedLogger == false) {
+            this.logger.warn("Asked to unregister a logger that was not registered, skipping removal request");
+        }
+    }
+
+    /**
+     * Notifies all registered BufferChangeLogger instances of a change.
+     *
+     * @param newData the buffer that contains the new data being added
+     * @param numChars the number of valid characters in the buffer
+     */
+    protected void notifyBufferChange(char[] newData, int numChars) {
+        synchronized(bufferChangeLoggers) {
+            Iterator<BufferChangeLogger> iterator = bufferChangeLoggers.iterator();
+            while (iterator.hasNext()) {
+                iterator.next().bufferChanged(newData, numChars);
+            }
+        }
     }
 }

@@ -123,6 +123,11 @@ public class BlockingConsumer extends ConsumerImpl {
 
                 logger.trace("BlockingConsumer " + this + " notifying listeners of buffer change");
                 notify(); // seeing that we read something, wake people up
+
+                // We explicitly call this after appending to the
+                // buffer, just in case one of the BufferChangeLoggers
+                // accidentally modifies the character buffer.
+                notifyBufferChange(cs, length);
             } // end synchronized(this)
         } // end while loop
 
