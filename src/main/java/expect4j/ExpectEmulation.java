@@ -85,11 +85,10 @@ public class ExpectEmulation extends Extension {
      * TODO set expect_out array
      */
     public class ExpectCommand implements Command {
-        void releaseClosures(Interp interp, Collection preserved) {
-            Iterator iter = preserved.iterator();
-            while( iter.hasNext() ) {
-                TclObject tclCode = (TclObject) iter.next();
-                tclCode.release();
+        void releaseClosures(Interp interp, Collection<TclObject> preserved) {
+            Iterator<TclObject> iter = preserved.iterator();
+            while (iter.hasNext()) {
+                iter.next().release();
             }
         }
         
@@ -101,12 +100,12 @@ public class ExpectEmulation extends Extension {
             TclObject argArr = args[1];
             TclObject argv[] = TclList.getElements(interp, argArr);
             
-            List /* <Pair> */ pairs = new ArrayList();
-            int i=0;
+            List<Match> pairs = new ArrayList<>();
+            int i = 0;
             String arg;
             logger.debug("Looking at expect args");
             Match pair;
-            Collection preserved = new ArrayList(argv.length - i);
+            Collection<TclObject> preserved = new ArrayList<>(argv.length - i);
             
             while( i < argv.length ) {
                 arg = argv[i].toString();
@@ -578,7 +577,7 @@ public class ExpectEmulation extends Extension {
         }
     }
     
-    public class MapAssocData extends HashMap implements AssocData {
+    public class MapAssocData extends HashMap<String, Expect4j> implements AssocData {
         public void disposeAssocData(Interp interp) {
         }
     }

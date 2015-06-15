@@ -70,7 +70,7 @@ public class ExpectUtilsSpawnTest {
         final StringBuffer rxStr = new StringBuffer();
         final StringBuffer txStr = new StringBuffer();
 
-        ArrayList matches = new ArrayList();
+        List<Match> matches = new ArrayList<>();
         matches.add(new RegExpMatch("RX bytes:(\\d+)", new Closure() {
             public void run(ExpectState state) {
                 rxStr.append(state.getMatch(1));
@@ -124,7 +124,7 @@ public class ExpectUtilsSpawnTest {
         final StringBuffer receivedStr = new StringBuffer();
         final StringBuffer transmittedStr = new StringBuffer();
      
-        ArrayList matches = new ArrayList();
+        List<Match> matches = new ArrayList<>();
         matches.add( new RegExpMatch("Bytes received\\s*(\\d+)\\r\\n", new Closure() {
             public void run(ExpectState state) {
                 receivedStr.append( state.getMatch(1) );
@@ -178,7 +178,7 @@ public class ExpectUtilsSpawnTest {
         final StringBuffer mtuStr = new StringBuffer();
         final StringBuffer flagsStr = new StringBuffer();
      
-        ArrayList matches = new ArrayList();
+        List<Match> matches = new ArrayList<>();
         matches.add( new RegExpMatch("mtu (\\d+)", new Closure() {
             public void run(ExpectState state) {
                 mtuStr.append( state.getMatch(1) );

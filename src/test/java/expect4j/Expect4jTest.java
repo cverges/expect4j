@@ -160,7 +160,7 @@ public class Expect4jTest extends TestCase {
             }
         };
         
-        List pairs = new ArrayList();
+        List<Match> pairs = new ArrayList<>();
         pairs.add( new RegExpMatch("quick\\s(.{5}\\s)(f[oO]T?x)", closure) ); //"quick\\s(.{5}\\s)(f?x)"
         
         int index = instance.expect(pairs);
@@ -191,7 +191,7 @@ public class Expect4jTest extends TestCase {
         Expect4j instance = new Expect4j(pair);
         instance.setDefaultTimeout(2000); // quicken our testing
         
-        List pairs = new ArrayList();
+        List<Match> pairs = new ArrayList<>();
         pairs.add( new GlobMatch("excited", null) );
         pairs.add( new RegExpMatch("lazy", null) );
         pairs.add( new GlobMatch("brown", null) );
@@ -234,7 +234,7 @@ public class Expect4jTest extends TestCase {
         instance.setDefaultTimeout(2000);
 
         // "The quick brown fox jumps over the lazy dog"
-        List pairs = new ArrayList();
+        List<Match> pairs = new ArrayList<>();
         pairs.add( new GlobMatch("The quick", new Closure() {
             public void run(ExpectState state) {
                 state.exp_continue();
@@ -294,7 +294,7 @@ public class Expect4jTest extends TestCase {
         
         final StringBuffer buffer = new StringBuffer();
         
-        List pairs = new ArrayList();
+        List<Match> pairs = new ArrayList<>();
         pairs.add( new GlobMatch("hot", null) );
         pairs.add( new GlobMatch("air", null) );
         pairs.add( new TimeoutMatch(1000, new Closure() {

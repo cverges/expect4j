@@ -277,7 +277,7 @@ public class Expect4j {
     public int expect(String pattern, Closure handler) throws MalformedPatternException, Exception {
         logger.trace("Searching for '" + pattern + "' in the reader stream and executing Closure " + handler + " if found");
         PatternPair match = new GlobMatch(pattern, handler);
-        List /* <PatternMatch> */ list = new ArrayList();
+        List<Match> list = new ArrayList<>();
         list.add(match);
         return expect(list);
     }
@@ -296,7 +296,7 @@ public class Expect4j {
      */
     public int expect(Match args[]) throws MalformedPatternException, Exception {
         logger.trace("Searching for " + args.length + " patterns in the reader stream");
-        List pairs = new ArrayList();
+        List<Match> pairs = new ArrayList<>();
         for (int i = 0; i < args.length; i++) {
             Match match = args[i];
             pairs.add(match);
@@ -315,18 +315,18 @@ public class Expect4j {
      * @throws Exception if a generic error is encountered while
      *                   processing the {@link Closure}
      */
-    public int expect(final List /* <Match> */ pairs) throws Exception {
+    public int expect(final List<Match> pairs) throws Exception {
         logger.trace("Searching for " + pairs.size() + " patterns in the reader stream");
 
         // Buckets
         EofMatch eofMatch = null;
         TimeoutMatch timeoutMatch = null;
-        List /* <PatternPair> */ patternMatches = new ArrayList();
+        List<Match> patternMatches = new ArrayList<>();
 
         // Fill buckets in one swoop
-        Iterator iter = pairs.iterator();
+        Iterator<Match> iter = pairs.iterator();
         while (iter.hasNext()) {
-            Object match = iter.next();
+            Match match = iter.next();
             if (!(match instanceof Match)) {
                 logger.debug("Object " + match + " is not of type expect4j.matches.Match, cannot use as a pattern");
                 continue;
@@ -347,12 +347,15 @@ public class Expect4j {
         // if( eofMatch == null ) eofMatch = new EofMatch();
         // if( timeoutMatch == null ) // that's ok
         long timeout;
-        if (timeoutMatch != null && timeoutMatch.getTimeout() != TIMEOUT_NOTSET)
+        if (timeoutMatch != null && timeoutMatch.getTimeout() != TIMEOUT_NOTSET) {
             timeout = timeoutMatch.getTimeout();
-        else
+        } else {
             timeout = defaultTimeout;
+        }
+
         long startTime = System.currentTimeMillis();
         long endTime = startTime + timeout;
+
         logger.debug("Timeout set to " + timeout + " milliseconds, expires at " + endTime);
 
         boolean foundTimeout = false;
@@ -517,9 +520,10 @@ public class Expect4j {
      */
     protected ExpectState prepareClosure(int pairIndex, String buffer) {
         ExpectState state;
-        Map prevMap = null;
-        if (g_state != null)
+        Map<String, Object> prevMap = null;
+        if (g_state != null) {
             prevMap = g_state.getVars();
+        }
 
         state = new ExpectState(pairIndex, buffer, prevMap);
 
@@ -550,9 +554,10 @@ public class Expect4j {
 
         // Prepare Closure environment
         ExpectState state;
-        Map prevMap = null;
-        if (g_state != null)
+        Map<String, Object> prevMap = null;
+        if (g_state != null) {
             prevMap = g_state.getVars();
+        }
 
         int matchedWhere = result.beginOffset(0);
         String matchedText = result.toString(); // expect_out(0,string)
@@ -562,7 +567,7 @@ public class Expect4j {
         char[] chBuffer = input.getBuffer();
         String copyBuffer = new String(chBuffer, 0, result.endOffset(0) );
 
-        List /* <String> */ groups = new ArrayList();
+        List<String> groups = new ArrayList<>();
         for (int j = 1; j <= result.groups(); j++) {
             String group = result.group(j);
             groups.add( group );

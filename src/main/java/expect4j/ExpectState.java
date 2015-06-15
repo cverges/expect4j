@@ -53,7 +53,7 @@ public class ExpectState {
      * @param prevMap a <code>Map</code> of the variables previously set
      *                by {@link Closure}s
      */
-    public ExpectState(String buffer, int matchedWhere, String match, int pairIndex, List groups, Map prevMap) {
+    public ExpectState(String buffer, int matchedWhere, String match, int pairIndex, List groups, Map<String, Object> prevMap) {
         this(pairIndex, buffer, prevMap);
         this.matchedWhere = matchedWhere;
         this.match = match;
@@ -78,7 +78,7 @@ public class ExpectState {
      * @param prevMap a <code>Map</code> of the variables previously set
      *                by {@link Closure}s
      */
-    public ExpectState(int pairIndex, String buffer, Map prevMap) {
+    public ExpectState(int pairIndex, String buffer, Map<String, Object> prevMap) {
         this.buffer = buffer;
         this.matchedWhere = -1;
         this.match = null;
@@ -87,7 +87,7 @@ public class ExpectState {
         shouldContinue = false;
         shouldResetTimer = false;
 
-        vars = new HashMap();
+        vars = new HashMap<>();
         if (prevMap != null)
             vars.putAll(prevMap);
     }
@@ -274,7 +274,7 @@ public class ExpectState {
      * <code>final</code> buffer (such as <code>StringBuffer</code>),
      * which may be more appropriate for certain cases.
      */
-    protected Map vars;
+    protected Map<String, Object> vars;
 
     /**
      * Adds a key/value pair from a {@link Closure} context.
@@ -301,7 +301,7 @@ public class ExpectState {
      *
      * @return the whole list of variables
      */
-    Map getVars() {
+    Map<String, Object> getVars() {
         return vars;
     }
 }
