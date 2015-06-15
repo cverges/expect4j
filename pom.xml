@@ -4,7 +4,7 @@
 
     <groupId>com.github.cverges.expect4j</groupId>
     <artifactId>expect4j</artifactId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.7-RELEASE</version>
     <packaging>jar</packaging>
     <name>expect4j</name>
     <url>http://github.com/cverges/expect4j</url>
@@ -38,8 +38,8 @@
         <connection>scm:git:git://github.com/cverges/expect4j.git</connection>
         <developerConnection>scm:git:git@github.com:cverges/expect4j.git</developerConnection>
         <url>http://github.com/cverges/expect4j</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <developers>
         <developer>
@@ -191,6 +191,17 @@
                     <arguments>-Dgpg.keyname=${gpg.keyname} -Dgpg.passphrase=${gpg.passphrase}</arguments>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.5</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugins>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -239,15 +250,16 @@
         </pluginManagement>
     </build>
 
-    <!--
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>internal.repo</id>
-            <name>Internal Repository</name>
-            <url>${internal.repo.path}</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-    -->
 
     <dependencies>
         <dependency>
