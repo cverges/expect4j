@@ -26,9 +26,9 @@ import expect4j.*;
  * @author Justin Ryan
  */
 public class Match {
-    
+
     Closure closure;
-    
+
     /** Creates a new instance of EofMatch */
     public Match(Closure closure) {
         this.closure = closure;

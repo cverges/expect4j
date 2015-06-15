@@ -35,11 +35,11 @@ public class BlockingConsumerTest extends TestCase {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(BlockingConsumerTest.class);
-    
+
     public BlockingConsumerTest(String testName) {
         super(testName);
     }
-    
+
     StringPair pair;
     Consumer consumer;
     Thread consumerThread;
@@ -48,81 +48,81 @@ public class BlockingConsumerTest extends TestCase {
         consumer = new BlockingConsumer(pair);
         consumerThread = new Thread(consumer);
     }
-    
+
     protected void tearDown() throws Exception {
     }
-    
+
     /**
 	 * Test of run method, of class expect4j.PollingConsumer.
 	 */
     public void testRun() {
         System.out.println("run");
-        
+
         consumerThread.start();
         consumer.stop();
-        
+
         boolean ableToJoin = false;
         try {
             consumerThread.join(1000l);
             ableToJoin = true;
         }catch(InterruptedException e) {
         }
-        
+
         assertTrue(ableToJoin);
     }
-    
+
     public void testRead() {
         consumerThread.start();
         try { Thread.sleep(500); }catch(Exception e) { }
-        
+
         // should be available by now
         String result = consumer.pause();
-        
+
         consumer.stop();
-        
+
         assertEquals("The lazy fox", result);
     }
-    
+
     public void testMatch() {
         logger.info("Entering " + getClass().getName() + ".testMatch");
-        
+
         consumerThread.start();
-        
+
         consumer.waitForBuffer(500);
-        
+
         String result = consumer.pause();
         assertEquals("The lazy fox", result);
-        
+
         consumer.resume(5);
-        
-        result = consumer.pause();        
+
+        result = consumer.pause();
         assertEquals("azy fox", result);
-        
+
         consumer.stop();
-        
+
         logger.info("Exiting " + getClass().getName() + ".testMatch");
     }
-    
+
     public void testWrite() throws IOException {
         consumerThread.start();
-        
+
         consumer.send("Writing");
-        
+
         consumer.stop();
-        
+
         String result = pair.getResult();
-        
+
         assertEquals("Writing", result);
     }
-    
+
     public void testWait() throws IOException {
         System.out.println("run");
-        
+
         consumerThread.start();
-        
+
         consumer.waitForBuffer(1000L);
-        
+
         consumer.stop();
-        
+
     }
 }

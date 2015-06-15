@@ -36,17 +36,17 @@ public class PollingConsumer extends ConsumerImpl {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(PollingConsumer.class);
-    
+
     boolean dirtyBuffer;
     Boolean callerProcessing = Boolean.FALSE;
-    
+
     boolean foundMore = false;
-    
+
     public PollingConsumer(IOPair pair) {
         super(pair);
         dirtyBuffer = false;
     }
-    
+
     /**
      * TODO Handle timeout of zero to expect, that shouldn't wait
      */
@@ -55,7 +55,7 @@ public class PollingConsumer extends ConsumerImpl {
         char cs[] = new char[256];
         int ioErrorCount = 0;
         Reader reader = pair.getReader();
-        
+
         logger.trace("Starting primary loop");
         while ( !stopRequested && !foundEOF && ioErrorCount < 4) {
             try {
@@ -70,13 +70,13 @@ public class PollingConsumer extends ConsumerImpl {
                     foundEOF = true;
                     break;
                 }
-                
+
                 //if( !ready ) { ready = true; log.fine("Faking ready"); }
-                
+
                 if ( ready ) {
                     logger.trace("Is Ready");
-                    
-                    
+
+
                     // don't modify the buffer while processing is happening
                     // written as while loop to prevent spurious interrupts
                     synchronized(this) {
@@ -89,11 +89,11 @@ public class PollingConsumer extends ConsumerImpl {
                                 continue;
                             }
                         }
-                        
+
                         logger.trace("About to wait for buffer lock");
                         synchronized(buffer) {
                             length = reader.read(cs);
-                            
+
                             if( length == -1 ) { //EOF
                                 logger.trace("Found the EOF");
                                 logger.trace("Current buffer: " + buffer.toString() );
@@ -101,16 +101,16 @@ public class PollingConsumer extends ConsumerImpl {
                                 dirtyBuffer = true;
                                 break;
                             }
-                            
+
                             String print = new String(cs, 0, length);
                             print = print.replaceAll("\n", "\\\\n");
                             print = print.replaceAll("\r", "\\\\r");
                             logger.trace("Appending >>>" + print + "<<<");
                             buffer.append( cs, 0, length ); // thread safe
-			    
+
                             logger.trace("Current Buffer: " + buffer.toString() );
                             dirtyBuffer = true;
-                            
+
                             /**
                              * TODO Trim down buffer.  This current method won't work if a resume comes in, since it's offset
                              * will be invalid once this delete method runs
@@ -119,7 +119,7 @@ public class PollingConsumer extends ConsumerImpl {
                              * if( buffer.length() > BUFFERMAX )
                              * buffer.delete(0, BUFFERMAX - buffer.length() );
                              */
-                            
+
                             logger.trace("Waking up who ever if listening");
                             buffer.notify(); // seeing that we read something, wait people up
 
@@ -129,7 +129,7 @@ public class PollingConsumer extends ConsumerImpl {
                             notifyBufferChange(cs, length);
                         }
                     }
-                    
+
                 } else {
                     logger.trace("Not Ready, sleeping");
                     try { Thread.sleep(500); } catch(InterruptedException ie) { }
@@ -142,8 +142,8 @@ public class PollingConsumer extends ConsumerImpl {
                 //continue;
             }
         } // end while loop
-        
-        
+
+
         synchronized(buffer) {
             buffer.notify();
         }
@@ -157,13 +157,13 @@ public class PollingConsumer extends ConsumerImpl {
             logger.debug("ioErrorCount at " + ioErrorCount );
         logger.trace("Leaving primary loop");
     }
-    
+
     /**
      * What is something came in between when we last checked and when this method is called
      */
     public void waitForBuffer(long timeoutMilli) {
         //assert(callerProcessing.booleanValue() == false);
-        
+
         synchronized(buffer) {
             if( dirtyBuffer )
                 return;
@@ -182,7 +182,7 @@ public class PollingConsumer extends ConsumerImpl {
             }
         }
     }
-    
+
     public String pause() {
         // TODO mark offset, so that it can be trimmed by resume coming in later
         String currentBuffer;
@@ -193,9 +193,9 @@ public class PollingConsumer extends ConsumerImpl {
         }
         return currentBuffer;
     }
-    
+
     public void resume(int offset) {
-        
+
         synchronized(this) {
             // if pause was called, then the main loop should be blocked callerProcessing,
             // and the buffer is safe.
@@ -204,16 +204,16 @@ public class PollingConsumer extends ConsumerImpl {
                 StringBuffer smaller = buffer.delete(0, offset + 1);
                 logger.trace("New size: " + buffer.length() + " vs " + smaller.length() );
             }
-            
+
             callerProcessing = Boolean.FALSE; // should allow consumer to continue
             notify();
         }
     }
-    
+
     /**
      * We have more input since wait started
      */
-    
+
     public static void main(String args[]) throws Exception {
         final StringBuffer buffer = new StringBuffer("The lazy fox");
         Thread t1 = new Thread() {
@@ -237,7 +237,7 @@ public class PollingConsumer extends ConsumerImpl {
         };
         t1.start();
         t2.start();
-        
+
         t1.join();
         t2.join();
         System.err.println(buffer);

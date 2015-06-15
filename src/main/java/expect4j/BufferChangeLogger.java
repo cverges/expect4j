@@ -24,7 +24,7 @@ package expect4j;
  * @author Chris Verges
  */
 public interface BufferChangeLogger {
-    
+
     /**
      * Called to track new data that goes into the buffer.  Data is
      * stored in a character array.  The number of characters is tracked

@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * expect.setDefaultTimeout(10 * 1000);
  *
  * final StringBuffer someTextBuffer = new StringBuffer();
- * 
+ *
  * expect.expect(new Match[] {
  *     new GlobMatch("text defined as a glob pattern", new Closure() {
  *         public void run(ExpectState state) {

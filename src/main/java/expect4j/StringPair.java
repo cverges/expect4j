@@ -28,21 +28,21 @@ public class StringPair implements IOPair {
     StringBuffer outBuffer;
     StringReader is;
     StringWriter os;
-    
+
     /** Creates a new instance of StringPair */
     public StringPair(String baseStr) {
         is = new StringReader(baseStr);
         os = new StringWriter();
     }
-    
+
     public Reader getReader() { return is; }
     public Writer getWriter() { return os; }
-    
+
     public String getResult() {
         os.flush();
         return os.getBuffer().toString();
     }
-    
+
     /**
      * TODO evaluate if this is even needed
      */
@@ -54,10 +54,10 @@ public class StringPair implements IOPair {
         }catch(IOException ioe) {
         }
     }
-    
+
     public void close() {
         try { is.close(); } catch(Exception e) { }
         try { os.close(); } catch(Exception e) { }
     }
-    
+
 }

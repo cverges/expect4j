@@ -32,7 +32,7 @@ public class RegExpMatch extends PatternPair {
     public RegExpMatch(String patternStr, Closure closure) throws MalformedPatternException {
         super(patternStr, closure);
     }
-    
+
     //TODO: removed static keyword, since Perl5Compiler is not threadsafe
     //
     protected Perl5Compiler compiler;
@@ -41,7 +41,7 @@ public class RegExpMatch extends PatternPair {
             compiler = new Perl5Compiler();
         return compiler;
     }
-    
+
     public Pattern compilePattern(String patternStr) throws MalformedPatternException  {
         Perl5Compiler compiler = getCompiler();
         return compiler.compile(patternStr, Perl5Compiler.DEFAULT_MASK|Perl5Compiler.SINGLELINE_MASK); // |Perl5Compiler.MULTILINE_MASK

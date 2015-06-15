@@ -36,17 +36,17 @@ public class ExpectUtilsSSHTest extends TestCase {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(ExpectUtilsSSHTest.class);
-    
+
     public ExpectUtilsSSHTest(String testName) {
         super(testName);
     }
-    
+
     protected void setUp() throws Exception {
     }
-    
+
     protected void tearDown() throws Exception {
     }
-    
+
     /**
      * Test of SSH method, of class expect4j.ExpectUtils.
      * First response should be something like:
@@ -54,16 +54,16 @@ public class ExpectUtilsSSHTest extends TestCase {
      */
     public void testSSH() throws Exception {
         System.out.println("SSH");
-        
+
         String hostname = "hostname";
         String username = "username";
         String password = "password";
-        
+
         if( hostname.equals("hostname") ) return;
-        
+
         Expect4j expect = ExpectUtils.SSH(hostname, username, password, 2222);
         //expect.setDefaultTimeout(Expect4j.TIMEOUT_FOREVER);
-        
+
         // Mar 15 17:42:02 2007
         final DateFormat format = new SimpleDateFormat("MMM dd HH:mm:ss yyy z");
         expect.expect( new Match[] {
@@ -75,17 +75,17 @@ public class ExpectUtilsSSHTest extends TestCase {
                 }
             })
         });
-        
+
         expect.close();
-        
+
         Date result = (Date) expect.getLastState().getVar("timestamp");
         assertNotNull( result );
         logger.info("Timestamp: " + result);
-        
+
         Date expResult = new Date();
         logger.info("Timestamp: " + expResult);
         assertTrue( result.before(expResult) );
-        
+
         expect.close();
     }
 }

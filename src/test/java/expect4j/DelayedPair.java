@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Fake the processing of stream, by adding delays.
- * 
+ *
  * @author Chris Verges
  * @author Justin Ryan
  */
@@ -33,19 +33,19 @@ public class DelayedPair implements IOPair {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(DelayedPair.class);
-    
+
     Reader is;
     StringWriter os;
     Thread delayedWriter = null;
     boolean ended = false;
     boolean ending = false;
-    
+
     public DelayedPair(final String baseStr, final int delay, final int endDelay) throws Exception {
         final PipedWriter writer = new PipedWriter();
         is = new PipedReader( writer );
-        
+
         final String parts[] = baseStr.split(" ");
-        
+
         delayedWriter = new Thread() {
             public void run() {
                 logger.debug("Running Delayed Writer");
@@ -61,13 +61,13 @@ public class DelayedPair implements IOPair {
                         logger.warn(e.getMessage());
                     }
                 }
-                
+
                 if (!ending) {
                     try {
                         Thread.sleep(endDelay * 1000);
                     } catch (Exception e) {}
                 }
-                
+
                 try {
                     writer.close();
                     is.close();
@@ -81,21 +81,21 @@ public class DelayedPair implements IOPair {
             }
         };
         delayedWriter.start();
-        
+
         os = new StringWriter();
     }
-    
+
     public Reader getReader() {
         return (ending) ? null : is;
     }
-    
+
     public Writer getWriter() { return os; }
-    
+
     public String getResult() {
         os.flush();
         return os.getBuffer().toString();
     }
-    
+
     /**
      * TODO evaluate if this is even needed
      */
@@ -105,10 +105,10 @@ public class DelayedPair implements IOPair {
         }catch(IOException ioe) {
         }
     }
-    
+
     public void close() {
         try { os.close(); } catch(Exception e) { }
-        
+
         ending = true;
         delayedWriter.interrupt(); // thread will close is
         try { delayedWriter.join(1000); } catch(Exception e) { }

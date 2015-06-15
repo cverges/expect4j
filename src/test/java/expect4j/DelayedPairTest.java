@@ -30,31 +30,31 @@ public class DelayedPairTest extends TestCase {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(DelayedPairTest.class);
-   
+
     /** Creates a new instance of DelayedPairTest */
     public DelayedPairTest(String testName) {
         super(testName);
     }
-    
+
     public void testCtor() throws Exception {
         DelayedPair pair = new DelayedPair("The quick", 50, 1);
-        
+
         Thread.sleep( 2000 );
         logger.debug("Checking for EOF");
         assertTrue(pair.ended);
     }
-    
+
     public void testClose() throws Exception {
         DelayedPair pair = new DelayedPair("The quick brown fox jumped over the moon", 500, 1000);
-        
+
         Thread.sleep( 500 );
         pair.close();
         Thread.sleep( 100 );
-        
+
         logger.debug("Make sure pair ends early");
         assertTrue(pair.ended);
     }
-    
+
     public void testWrite() throws Exception {
         DelayedPair pair = new DelayedPair("The quick brown fox jumped over the moon", 50, 100);
 
@@ -65,14 +65,14 @@ public class DelayedPairTest extends TestCase {
 	StringBuffer result = new StringBuffer( new String(ch, 0, length) );
 	System.out.println(result);
 	assertFalse(result.toString().equals("The quick brown fox jumped over the moon"));
-	
+
         Thread.sleep( 1000 );
 
 	length = pair.getReader().read(ch);
 	result.append(ch, 0, length);
 	System.out.println(result);
 	assertEquals(result.toString(), "The quick brown fox jumped over the moon");
-	
-	pair.close();        
+
+	pair.close();
     }
 }

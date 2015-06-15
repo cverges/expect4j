@@ -32,16 +32,16 @@ public class TclClosure implements Closure {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(TclClosure.class);
-    
+
     Interp interp;
     TclObject tclCode;
-    
+
     /** Creates a new instance of TclClosure */
     public TclClosure(Interp interp, TclObject tclCode) {
         this.interp = interp;
         this.tclCode = tclCode;
     }
-    
+
     /**
      * Establish certain variables in the TCL interp. These include:
      *
@@ -50,15 +50,15 @@ public class TclClosure implements Closure {
      */
     public void run(ExpectState state) throws Exception {
         int flags = 0; // TCL.NAMESPACE_ONLY
-        
+
         // TODO Inject expect object, so that expect wrapper can access it
         // clear previous expect_out
         //interp.unsetVar("expect_out", flags);
-        
+
         String buffer = state.getBuffer();
         logger.trace("Setting var expect_out(buffer) to " + buffer);
         interp.setVar("expect_out", "buffer", buffer, flags);
-        
+
         int group = 0;
         while(true) {
             String match = state.getMatch(group);
@@ -69,12 +69,12 @@ public class TclClosure implements Closure {
             logger.trace("Setting var expect_out(" + index +") to " + match);
             interp.setVar("expect_out", index , match, flags);
         }
-        
+
         ExpectEmulation.setExpContinue(interp, false);
-        
+
         if( tclCode != null && tclCode.toString().length() > 0 ) {
             logger.debug("Running a tcl bit of code: " + tclCode.toString());
-            
+
             try {
                 interp.eval(tclCode, 0);
             } catch(TclException e) {
@@ -87,9 +87,9 @@ public class TclClosure implements Closure {
             }
         }
         //interp.unsetVar("expect_out", flags);
-        
+
     }
-    
+
     public String toString() {
         if( tclCode != null)
             return tclCode.toString();

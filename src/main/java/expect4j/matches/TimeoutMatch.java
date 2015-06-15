@@ -25,11 +25,11 @@ import expect4j.*;
  * @author Justin Ryan
  */
 public class TimeoutMatch extends Match {
-        
+
     long timeout;
-    
-    /** 
-     * Creates a new instance of TimeoutMatch with a default timeout of 
+
+    /**
+     * Creates a new instance of TimeoutMatch with a default timeout of
      * ten seconds
      */
     public TimeoutMatch(Closure closure) {
@@ -40,7 +40,7 @@ public class TimeoutMatch extends Match {
         super(closure);
         this.timeout = milli;
     }
-    
+
     public long getTimeout() {
         return timeout;
     }

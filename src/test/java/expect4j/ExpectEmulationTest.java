@@ -28,7 +28,7 @@ import tcl.lang.Interp;
  * @author Justin Ryan
  */
 public class ExpectEmulationTest extends TestCase {
-    
+
     public ExpectEmulationTest(String testName) {
         super(testName);
     }
@@ -41,12 +41,12 @@ public class ExpectEmulationTest extends TestCase {
 
     /**
      * Load interpreter
-     * 
+     *
      * TODO Figure out a system for testing.
      */
     public void testInterp() throws IOException {
         Interp interp = new Interp();
-        
+
     }
-    
+
 }

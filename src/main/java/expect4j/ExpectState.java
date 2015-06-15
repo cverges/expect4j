@@ -38,7 +38,7 @@ public class ExpectState {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(ExpectState.class);
-    
+
     /**
      * Creates an <code>ExpectState</code> instance for a successful
      * match.  This instance is mostly immutable once created.
@@ -59,7 +59,7 @@ public class ExpectState {
         this.match = match;
         this.groups = groups;
     }
-    
+
     /**
      * Creates an <code>ExpectState</code> instance for times when a
      * {@link Closure} is being run but there isn't a corresponding
@@ -67,8 +67,8 @@ public class ExpectState {
      */
     public ExpectState() {
         this(-1, null, null);
-    }    
-    
+    }
+
     /**
      * Creates an <code>ExpectState</code> instance for a successful
      * match.  This instance is mostly immutable once created.
@@ -95,7 +95,7 @@ public class ExpectState {
     /**
      * The offset, relative to the beginning of {@link
      * ExpectState#buffer}, where the match begins.
-     */  
+     */
     protected int matchedWhere;
 
     /**
@@ -106,7 +106,7 @@ public class ExpectState {
     public int getMatchedWhere() {
         return matchedWhere;
     }
-    
+
     /**
      * All text that generated a match while processing the buffer.
      */
@@ -121,7 +121,7 @@ public class ExpectState {
     public String getMatch() {
         return match;
     }
-    
+
     /**
      * A list of submatches based on the entire match.
      */
@@ -136,10 +136,10 @@ public class ExpectState {
             return getMatch();
         else if (groupnum > groups.size())
             return null;
-        
+
         return (String) groups.get(groupnum - 1);
     }
-    
+
     /**
      * TODO
      */
@@ -153,7 +153,7 @@ public class ExpectState {
     public int getPairIndex() {
         return pairIndex;
     }
-    
+
     /**
      * The entire reader buffer at the time of the match.
      */
@@ -182,7 +182,7 @@ public class ExpectState {
     public String getBuffer() {
         return buffer;
     }
-    
+
     /**
      * Sets the reader buffer.
      *
@@ -191,7 +191,7 @@ public class ExpectState {
     public void setBuffer(String buffer) {
         this.buffer = buffer;
     }
-    
+
     /**
      * A flag to indicate whether the {@link Expect4j} state machine
      * should continue to seek additional matches.
@@ -236,7 +236,7 @@ public class ExpectState {
     public boolean shouldResetTimer() {
         return shouldResetTimer;
     }
-    
+
     /**
      * Instructs the {@link Expect4j} state machine to continue to seek
      * additional matches after this one <i>and</i> to reset the timeout
@@ -248,7 +248,7 @@ public class ExpectState {
         shouldContinue = true;
         shouldResetTimer = true;
     }
-    
+
     /* Closure Variables */
 
     /**

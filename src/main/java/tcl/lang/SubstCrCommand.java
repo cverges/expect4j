@@ -24,11 +24,11 @@ public class SubstCrCommand implements Command {
         "-nocommands",
         "-novariables"
     };
-    
+
     static final int OPT_NOBACKSLASHES		= 0;
     static final int OPT_NOCOMMANDS         	= 1;
     static final int OPT_NOVARS			= 2;
-    
+
     /**
      * This procedure is invoked to process the "subst" Tcl command.
      * See the user documentation for details on what it does.
@@ -37,7 +37,7 @@ public class SubstCrCommand implements Command {
      * @param argv command arguments.
      * @exception TclException if wrong # of args or invalid argument(s).
      */
-    
+
     public void cmdProc(Interp interp, TclObject argv[])
     throws TclException {
         int currentObjIndex, len, i;
@@ -48,7 +48,7 @@ public class SubstCrCommand implements Command {
         StringBuffer result = new StringBuffer();
         String s;
         char c;
-        
+
         for (currentObjIndex = 1; currentObjIndex < objc; currentObjIndex++) {
             if (!argv[currentObjIndex].toString().startsWith("-")) {
                 break;
@@ -75,18 +75,18 @@ public class SubstCrCommand implements Command {
             throw new TclNumArgsException(interp, currentObjIndex, argv,
                             "?-nobackslashes? ?-nocommands? ?-novariables? string");
         }
-        
+
         /*
          * Scan through the string one character at a time, performing
          * command, variable, and backslash substitutions.
          */
-        
+
         s = argv[currentObjIndex].toString();
         len = s.length();
         i = 0;
         while (i < len) {
             c = s.charAt(i);
-            
+
             if ((c == '[') && doCmds) {
                 ParseResult res;
                 try {
@@ -128,7 +128,7 @@ public class SubstCrCommand implements Command {
                 i++;
             }
         }
-        
+
         interp.setResult(result.toString());
     }
 }

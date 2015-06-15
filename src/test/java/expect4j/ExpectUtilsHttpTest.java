@@ -51,7 +51,7 @@ public class ExpectUtilsHttpTest extends TestCase {
 
         port = httpServer.getAddress().getPort();
     }
-    
+
     public void tearDown() throws Exception {
         try {
             httpServer.stop(0);
@@ -59,23 +59,23 @@ public class ExpectUtilsHttpTest extends TestCase {
             // Don't worry 'bout it
         }
     }
-    
+
     /**
      * Test of Http method, of class expect4j.ExpectUtils.
      */
     public void testHttp() throws Exception {
         System.out.println("Http");
-        
+
         System.setProperty("expect4j.level", "400");
         //java.util.logging.LogManager.getLogManager().readConfiguration();
- 
+
         String url = "/";
         String expResult = "Harvard School of Engineering and Applied Sciences";
- 
+
         String result = ExpectUtils.Http(address, port, url);
 
         assertNotNull(result);
- 
+
         assertTrue( result.indexOf(TestHandler.response) != -1 );
     }
 

@@ -33,7 +33,7 @@ public class ExpectUtilsTelnetTest extends TestCase {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(ExpectUtilsTelnetTest.class);
-    
+
     public ExpectUtilsTelnetTest(String testName) {
         super(testName);
     }
@@ -45,20 +45,20 @@ public class ExpectUtilsTelnetTest extends TestCase {
     }
 
     public void testTelnetSwitch() throws Exception {
-        
+
     }
     public void testTelnet() throws Exception {
         System.out.println("telnet");
-        
+
         String hostname = "hostname";
         final String username = "username";
         final String password = "password";
-        
+
         if( hostname.equals("hostname") ) return; // fill in hostname, username,password.
-        
+
         final Expect4j expect = ExpectUtils.telnet(hostname, 23);
         expect.setDefaultTimeout(Expect4j.TIMEOUT_FOREVER);
-        
+
         expect.expect( new Match[] {
             new GlobMatch("login: ", new Closure() {
                 public void run(ExpectState state) {
@@ -111,24 +111,24 @@ public class ExpectUtilsTelnetTest extends TestCase {
                 }
             })
         });
-        
+
         expect.close();
-        
+
         ExpectState lastState = expect.getLastState();
-        
+
         Boolean result = (Boolean) lastState.getVar("sentUsername");
         assertNotNull( result );
-        
+
         result = (Boolean) lastState.getVar("sentPassword");
         assertNotNull( result );
-        
+
         result = (Boolean) lastState.getVar("gotLogin");
         assertNotNull( result );
 
         result = (Boolean) lastState.getVar("sentExit");
         assertNotNull( result );
-        
+
         //result = (Boolean) lastState.getVar("gotEOF");
         //assertNotNull( result );
-    }    
+    }
 }

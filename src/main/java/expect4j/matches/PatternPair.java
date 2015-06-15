@@ -25,10 +25,10 @@ import org.apache.oro.text.regex.*;
  * @author justin
  */
 public abstract class PatternPair extends Match {
-    
+
     String patternStr;
-    Pattern pattern;        
-    
+    Pattern pattern;
+
     /**
      * Creates a new instance of PatternPair
      */
@@ -36,10 +36,10 @@ public abstract class PatternPair extends Match {
         super(closure);
         this.patternStr = patternStr;
         pattern = compilePattern(patternStr);
-    }        
-    
+    }
+
     abstract public Pattern compilePattern(String patternStr) throws MalformedPatternException;
-    
+
     public Pattern getPattern() {
         return pattern;
     }

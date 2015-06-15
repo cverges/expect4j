@@ -28,17 +28,17 @@ import org.apache.oro.text.regex.*;
  * @author Justin Ryan
  */
 public class GlobMatch extends RegExpMatch {
-    
+
     /** Creates a new instance of RegExpMatch */
     public GlobMatch(String pattern, Closure closure) throws MalformedPatternException {
         super(pattern, closure);
     }
-        
-    public Pattern compilePattern(String patternStr) throws MalformedPatternException {                
+
+    public Pattern compilePattern(String patternStr) throws MalformedPatternException {
         int globOptions = GlobCompiler.DEFAULT_MASK | GlobCompiler.QUESTION_MATCHES_ZERO_OR_ONE_MASK;
         char [] patternCh = patternStr.toCharArray();
         String perl5PatternStr = GlobCompiler.globToPerl5(patternCh, globOptions);
-        
+
         return super.compilePattern(perl5PatternStr);
     }
 }

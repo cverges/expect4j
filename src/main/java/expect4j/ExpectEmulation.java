@@ -53,7 +53,7 @@ public class ExpectEmulation extends Extension {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(ExpectEmulation.class);
-    
+
     //@Overrides
     public void init(Interp interp) {
         interp.createCommand("exp_continue", new ExpContinueCommand());
@@ -65,18 +65,18 @@ public class ExpectEmulation extends Extension {
         interp.createCommand("spawn", new SpawnCommand());
         interp.createCommand("stty", new SttyCommand());
         interp.createCommand("timestamp", new TimestampCommand());
-        
+
         //interp.eval("rename subst ::tcl::subst");
         //interp.createCommand("subst", new tcl.lang.SubstCrCommand() );
         interp.createCommand("substcr", new tcl.lang.SubstCrCommand() );
-        
+
         try {
             interp.pkgProvide("expect", "2.0"); // closest equivalent
         } catch (TclException te) {
             logger.warn(te.getMessage());
         }
     }
-    
+
     /**
      * expect [[-opts] pat1 body1] ... [-opts] patn [bodyn]
      *
@@ -91,35 +91,35 @@ public class ExpectEmulation extends Extension {
                 iter.next().release();
             }
         }
-        
+
         public void cmdProc(Interp interp, TclObject args[]) throws TclException {
             // Do not allow empty expect statement
             if (args.length != 2)
                 throw new TclNumArgsException(interp, 0, args, "expect {[-opts] pat1 body1] ... [-opts] patn [bodyn]}");
-            
+
             TclObject argArr = args[1];
             TclObject argv[] = TclList.getElements(interp, argArr);
-            
+
             List<Match> pairs = new ArrayList<>();
             int i = 0;
             String arg;
             logger.debug("Looking at expect args");
             Match pair;
             Collection<TclObject> preserved = new ArrayList<>(argv.length - i);
-            
+
             while( i < argv.length ) {
                 arg = argv[i].toString();
                 //log.info(i + " Looking at " + arg);
-                
+
                 if( arg.equals("timeout") ) {
                     if( i + 1 >= argv.length )
                         throw new TclNumArgsException(interp, i, argv, "expect [[-opts] pat1 body1] ... [-opts] patn [bodyn]");
                     TclObject tclCode = argv[++i];
                     TclClosure closure = new TclClosure(interp, tclCode);
                     pair = new TimeoutMatch( closure );
-                    
+
                     logger.debug("Adding Timeout Match");
-                    
+
                     pairs.add( pair );
                 } else if( arg.equals("eof") ) {
                     if( i + 1 >= argv.length )
@@ -127,9 +127,9 @@ public class ExpectEmulation extends Extension {
                     TclObject tclCode = argv[++i];
                     TclClosure closure = new TclClosure(interp, tclCode);
                     pair = new EofMatch( closure );
-                    
+
                     logger.debug("Adding Eof Match");
-                    
+
                     pairs.add( pair );
                 } else {
                     TclObject patternObj;
@@ -140,7 +140,7 @@ public class ExpectEmulation extends Extension {
                         patternObj = argv[i];
                         arg = "-gl"; // default to glob
                     }
-                    
+
                     String javaStr = patternObj.toString();
                     /*
                     StringBuffer hexString = new StringBuffer();
@@ -152,7 +152,7 @@ public class ExpectEmulation extends Extension {
                     javaStr = javaStr.replaceAll("\\r", "\\\\r");
                     javaStr = javaStr.replaceAll("\\n", "\\\\n");
                     //interp.eval("subst -nobackslashes -nocommands {" + patternObj.toString() + "}", 0);
-                    
+
                     Command substCmd = interp.getCommand("substcr");
                     TclObject substArgv[] = new TclObject[] {
                         TclString.newInstance("substcr"),
@@ -161,10 +161,10 @@ public class ExpectEmulation extends Extension {
                         patternObj
                     };
                     substCmd.cmdProc(interp, substArgv);
-                    
+
                     TclObject substPatternObj = interp.getResult();
                     String pattern = substPatternObj.toString();
-                    
+
                     TclClosure closure = null;
                     TclObject tclCode = null;
                     if( i + 1 < argv.length ) {
@@ -174,7 +174,7 @@ public class ExpectEmulation extends Extension {
                         tclCode = tclCodeDirect;
                     }
                     closure = new TclClosure(interp, tclCode);
-                    
+
                     logger.debug(i + " Pattern Obj is >>" + javaStr + "<< and pattern is >>>" + pattern + "<<<");
                     try {
                         if( arg.startsWith("-re") ) {
@@ -207,12 +207,12 @@ public class ExpectEmulation extends Extension {
                     pairs.add( pair );
                 }
                 i++;
-                
+
             } // end while
-            
+
             // Lookup Expect
             Expect4j expect4j = expStateCurrent(interp);
-            
+
             // Timeout
             try {
                 TclObject timeoutObj = interp.getVar("timeout", null, 0);
@@ -221,13 +221,13 @@ public class ExpectEmulation extends Extension {
             }catch(Exception e) {
                 expect4j.setDefaultTimeout( Expect4j.TIMEOUT_DEFAULT );
             }
-            
+
             boolean isDebug = isExpDebug(interp);
             boolean isEcho = isEcho(interp);
             boolean isLogUser = isLogUser(interp);
             // TODO
             //expect4j.setDebugLevels(isDebug, isEcho, isLogUser);
-            
+
             // Run Expect
             int ret;
             try {
@@ -239,13 +239,13 @@ public class ExpectEmulation extends Extension {
             } finally {
                 releaseClosures(interp, preserved);
             }
-            
+
             interp.setResult(ret);
         }
     }
-    
+
     /* Commands in alphabetical order*/
-    
+
     /**
      * exp_continue
      *
@@ -255,12 +255,12 @@ public class ExpectEmulation extends Extension {
         public void cmdProc(Interp interp, TclObject argv[]) throws TclException {
             if (argv.length != 1)
                 throw new TclNumArgsException(interp, 0, argv, "");
-            
+
             setExpContinue(interp, true);
             // TODO immeadiately set debug level on Expect4j object
         }
     }
-    
+
     /**
      * exp_internal [-f file] [-info] [0|1]
      *
@@ -270,7 +270,7 @@ public class ExpectEmulation extends Extension {
         public void cmdProc(Interp interp, TclObject argv[]) throws TclException {
             if (argv.length != 2)
                 throw new TclNumArgsException(interp, 0, argv, "[0|1]");
-            
+
             String arg = argv[1].toString();
             if( arg.equals("1") )
                 setExpDebug(interp, true);
@@ -280,7 +280,7 @@ public class ExpectEmulation extends Extension {
                 throw new TclNumArgsException(interp, 0, argv, "[0|1]");
         }
     }
-    
+
     /**
      * log_user [0|1]
      *
@@ -290,7 +290,7 @@ public class ExpectEmulation extends Extension {
         public void cmdProc(Interp interp, TclObject argv[]) throws TclException {
             if (argv.length != 2)
                 throw new TclNumArgsException(interp, 0, argv, "[0|1]");
-            
+
             String arg = argv[1].toString();
             if( arg.equals("1") )
                 setLogUser(interp, true);
@@ -298,11 +298,11 @@ public class ExpectEmulation extends Extension {
                 setLogUser(interp, false);
             else
                 throw new TclNumArgsException(interp, 0, argv, "[0|1]");
-            
+
             // TODO immeadiately set debug level on Expect4j object
         }
     }
-    
+
     /**
      * Send
      */
@@ -311,7 +311,7 @@ public class ExpectEmulation extends Extension {
             logger.debug("Send Command arg # " + argv.length);
             if (argv.length == 1)
                 throw new TclNumArgsException(interp, 1, argv, "[-flags] [--] string");
-            
+
             boolean checkingFlags = true;
             int i=1;
             String arg = null;
@@ -325,31 +325,31 @@ public class ExpectEmulation extends Extension {
                 if( checkingFlags && arg.startsWith("-") )
                     continue;
             }
-            
+
             // Compensate for the added i++
             if (i - 1 == argv.length)
                 throw new TclNumArgsException(interp, 1, argv, "[-flags] [--] string");
-            
+
             //arg = interp.convertStringCRLF(arg); // TODO confirm is CRLF removal is necessary
             String pattern1 = "\r(?=[^\n])";
             String pattern2 = "\r$";
             arg = arg.replaceAll(pattern1, org.apache.commons.net.SocketClient.NETASCII_EOL);
             arg = arg.replaceAll(pattern2, org.apache.commons.net.SocketClient.NETASCII_EOL);
-        
+
             Expect4j expect4j = expStateCurrent(interp);
-            
-            
+
+
             try {
                 expect4j.send(arg);
             }catch(Exception ioe) {
                 throw new TclException(interp, "Unable to send " + arg);
             }
-            
+
             if( isEcho(interp) )
                 System.out.println(arg);
         }
     }
-    
+
     /**
      * sleep seconds
      */
@@ -357,7 +357,7 @@ public class ExpectEmulation extends Extension {
         public void cmdProc(Interp interp, TclObject argv[]) throws TclException {
             if (argv.length > 2)
                 throw new TclNumArgsException(interp, 0, argv, "seconds");
-            
+
             int seconds = TclInteger.get(interp, argv[1]);
             try {
                 Thread.sleep( seconds * 1000 );
@@ -365,7 +365,7 @@ public class ExpectEmulation extends Extension {
             }
         }
     }
-    
+
     /**
      * spawn [args] program [args]
      * Called with possible local paths, like C:\Windows\ssh.exe.
@@ -374,17 +374,17 @@ public class ExpectEmulation extends Extension {
         public void cmdProc(Interp interp, TclObject argv[]) throws TclException {
             if (argv.length == 1)
                 throw new TclNumArgsException(interp, 0, argv, "[args] program [args]");
-            
+
             // Skip the -args, e.g. -console, -ignore, -leaveopen, etc
             int i = 1;
             while( i < argv.length && argv[i].toString().indexOf('-') == 0 ) {
                 i++;
             }
-            
+
             if( i == argv.length ) // missing program arg
                 throw new TclNumArgsException(interp, i, argv, "[args] program [args]");
             String program = argv[i++].toString().trim();
-            
+
             // Determine if we're running ssh or telnet and create Pair
             Expect4j expect4j;
             if( program.indexOf("ssh") != -1 ) {
@@ -404,16 +404,16 @@ public class ExpectEmulation extends Extension {
                     }
                     i++;
                 }
-                
+
                 if( username == null)
                     throw new TclException(interp, "Username needs to be provided");
                 else
                     logger.debug("Username: " + username);
-                
+
                 if( i >= argv.length )
                     throw new TclNumArgsException(interp, i - 1, argv, "[-l username] [-P password] hostname");
                 String hostname = argv[i].toString().trim();
-                
+
                 try {
                     expect4j = ExpectUtils.SSH( hostname, username, password );
                 }catch(Exception e) {
@@ -428,10 +428,10 @@ public class ExpectEmulation extends Extension {
                 if( i >= argv.length )
                     throw new TclNumArgsException(interp, i, argv, "hostname port" );
                 hostname = argv[i++].toString().trim();
-                
+
                 if( i < argv.length )
                     portStr = argv[i++].toString().trim();
-                
+
                 int port = 23;
                 if( portStr != null ) {
                     try {
@@ -440,7 +440,7 @@ public class ExpectEmulation extends Extension {
                         throw new TclException(interp, "Unable to parse the port number");
                     }
                 }
-                
+
                 try {
                     expect4j = ExpectUtils.telnet( hostname, port);
                 }catch(Exception e) {
@@ -450,8 +450,8 @@ public class ExpectEmulation extends Extension {
                 // Unsupported
                 String[] cmdarray;
                 int cmdidx = 0;
-                int addlargs = argv.length - i + 1; 
-                
+                int addlargs = argv.length - i + 1;
+
                 // Guess OS
                 String OS = System.getProperty("os.name").toLowerCase();
                 if (OS.indexOf("windows 9") > -1) {
@@ -468,13 +468,13 @@ public class ExpectEmulation extends Extension {
                     // Unix
                     cmdarray = new String[ addlargs];
                 }
-                
+
                 // Append actual command and its args
                 cmdarray[cmdidx++] = program;
                 for(;i < argv.length; i++) {
                     cmdarray[cmdidx++] = argv[i].toString().trim();
                 }
-                
+
                 try {
                     Process process = Runtime.getRuntime().exec(cmdarray);
                     expect4j = new Expect4j(process);
@@ -482,7 +482,7 @@ public class ExpectEmulation extends Extension {
                     throw new TclException(interp, "Unable to start arbitary process");
                 }
             }
-            
+
             // Load and store lastSpawnId
             int nextId = 1;
             IntegerAssocData lastSpawnId = (IntegerAssocData) interp.getAssocData("lastSpawnId");
@@ -490,26 +490,26 @@ public class ExpectEmulation extends Extension {
                 nextId = lastSpawnId._i.intValue() + 1;
             lastSpawnId = new IntegerAssocData(nextId);
             interp.setAssocData("lastSpawnId", lastSpawnId);
-            
+
             // register spawn_id with list
             MapAssocData spawnIds = (MapAssocData) interp.getAssocData("spawnIds");
             if( spawnIds == null ) {
                 spawnIds = new MapAssocData();
             }
-            
+
             String spawnId = lastSpawnId._i.toString();
             logger.debug("Putting id in " + spawnId);
             spawnIds.put( spawnId, expect4j );
             interp.setAssocData("spawnIds", spawnIds);
-            
+
             // register spawn_id with interp
             TclObject spawnIdObj = TclInteger.newInstance( nextId );
             interp.setVar("spawn_id", spawnIdObj, 0);
             interp.traceVar("spawn_id", this, 0);
-            
+
             interp.setResult(spawnIdObj);
         }
-        
+
         public void traceProc(Interp interp, String name1, String name2, int flags) {
             logger.debug("Tracing");
             if ( (flags & TCL.TRACE_DESTROYED) != 0 )
@@ -518,7 +518,7 @@ public class ExpectEmulation extends Extension {
                 logger.warn("Interp Destroyed");
         }
     }
-    
+
     /**
      * timestamp [-seconds NNN] [-gmt] [-format format]
      *
@@ -528,17 +528,17 @@ public class ExpectEmulation extends Extension {
         public void cmdProc(Interp interp, TclObject argv[]) throws TclException {
             if (argv.length > 1)
                 throw new TclNumArgsException(interp, 0, argv, "");
-            
+
             long epoch = new Date().getTime();
             if( epoch >= Double.MAX_VALUE )
                 throw new TclException(interp, "Epoch is too large to convert to double");
-            
+
             double epochd = new Long(epoch).doubleValue();
             TclObject result = TclDouble.newInstance(epochd);
             interp.setResult( result );
         }
     }
-    
+
     /**
      * stty [-echo|echo]
      *
@@ -548,7 +548,7 @@ public class ExpectEmulation extends Extension {
         public void cmdProc(Interp interp, TclObject argv[]) throws TclException {
             if (argv.length > 2)
                 throw new TclNumArgsException(interp, 0, argv, "[echo|-echo]");
-            
+
             String cmd = argv[1].toString();
             logger.debug("stty cmd is " + cmd);
             if( cmd.equals("echo") )
@@ -557,50 +557,50 @@ public class ExpectEmulation extends Extension {
                 setEcho(interp, false);
             else
                 throw new TclException(interp, "Only echo is supported");
-            
+
             // TODO immeadiately set debug level on Expect4j object
-            
+
         }
     }
-    
+
     public class IntegerAssocData implements AssocData {
         public Integer _i;
         public IntegerAssocData(int value) {
             _i = new Integer(value);
         }
-        
+
         public IntegerAssocData(String s) {
             _i = new Integer(s);
         }
-        
+
         public void disposeAssocData(Interp interp) {
         }
     }
-    
+
     public class MapAssocData extends HashMap<String, Expect4j> implements AssocData {
         public void disposeAssocData(Interp interp) {
         }
     }
-    
+
     /* TODO change return type to Expect4j */
     public static Expect4j expStateCurrent(Interp interp) throws TclException {
         TclObject spawnObj = interp.getVar("spawn_id", 0); // confirm that this works and we don't need TCL.NAMESPACE_ONLY
-        
+
         Map spawnIds = (Map) interp.getAssocData("spawnIds");
         if( spawnIds == null )
             throw new TclException(interp, "spawn not called yet");
-        
+
         String spawnId = spawnObj.toString();
         if( !spawnIds.containsKey(spawnId) )
             throw new TclException(interp, "Unable to find spawn_id of " + spawnId);
-        
+
         Expect4j expect4j = (Expect4j) spawnIds.get(spawnId);
         if( expect4j == null )
             throw new TclException(interp, "Unable to find Expect context from " + spawnId);
-        
+
         return expect4j;
     }
-    
+
     public static boolean isVar(Interp interp, String varname) throws TclException {
         TclObject obj = null;
         try {
@@ -608,61 +608,61 @@ public class ExpectEmulation extends Extension {
         }catch(Exception e) {
             return false;
         }
-        
+
         if ( obj == null) {
             return false;
         }
-        
+
         return TclBoolean.get(interp, obj);
     }
     public static void setBooleanVar(Interp interp, String varname, boolean value) throws TclException {
         if( isVar(interp, varname) == value)
             return;
-        
+
         TclObject obj = TclBoolean.newInstance(value);
         logger.debug("Setting " + varname + " to " + Boolean.toString(value) );
         interp.setVar(varname, obj, TCL.GLOBAL_ONLY);
     }
-    
+
     public static boolean isEcho(Interp interp) throws TclException {
         return isVar(interp, "exp_tty_echo");
     }
     public static void setEcho(Interp interp, boolean setEcho) throws TclException {
         setBooleanVar(interp, "exp_tty_echo", setEcho);
     }
-    
+
     public static boolean isLogUser(Interp interp) throws TclException {
         return isVar(interp, "exp_log_user");
     }
     public static void setLogUser(Interp interp, boolean setLogUser) throws TclException {
         setBooleanVar(interp, "exp_log_user", setLogUser);
     }
-    
+
     public static boolean isExpDebug(Interp interp) throws TclException {
         return isVar(interp, "exp_debug");
     }
     public static void setExpDebug(Interp interp, boolean setExpDebug) throws TclException {
         setBooleanVar(interp, "exp_debug", setExpDebug);
     }
-    
+
     public static boolean isExpContinue(Interp interp) throws TclException {
         return isVar(interp, "exp_continue_set");
     }
     public static void setExpContinue(Interp interp, boolean setExpContinue) throws TclException {
         setBooleanVar(interp, "exp_continue_set", setExpContinue);
     }
-    
+
     public static String escape(final String value) {
         String raw = value;
         boolean isString = false;
-        
+
         if( value.indexOf('"') == 0 && value.lastIndexOf('"') == value.length() - 1) {
             isString = true;
             raw = value.substring(1, value.length() - 1);
         }
-        
+
         final StringBuffer result = new StringBuffer();
-        
+
         StringCharacterIterator iterator = new StringCharacterIterator(raw);
         char character = iterator.current();
         while (character != StringCharacterIterator.DONE ){
@@ -697,8 +697,8 @@ public class ExpectEmulation extends Extension {
         String clean = result.toString();
         if( isString )
             clean = '"' + clean + '"';
-        
+
         return clean;
     }
-    
+
 }

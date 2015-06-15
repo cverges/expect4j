@@ -25,7 +25,7 @@ import expect4j.*;
  * @author justin
  */
 public class TimeoutMatchTest extends TestCase {
-    
+
     public TimeoutMatchTest(String testName) {
         super(testName);
     }
@@ -34,7 +34,7 @@ public class TimeoutMatchTest extends TestCase {
     public void setUp() {
         closure = new Closure() {
             public void run(ExpectState state) throws Exception {
-                
+
             }
         };
     }
@@ -43,15 +43,15 @@ public class TimeoutMatchTest extends TestCase {
      */
     public void testGetTimeout() {
         System.out.println("getTimeout");
-        
+
         TimeoutMatch instance = null;
         long result;
-        
+
         // Default
         instance = new TimeoutMatch(closure);
         result = instance.getTimeout();
         assertEquals(Expect4j.TIMEOUT_NOTSET, result);
-        
+
         // Custom
         long expected = 555L;
         instance = new TimeoutMatch(expected, closure);

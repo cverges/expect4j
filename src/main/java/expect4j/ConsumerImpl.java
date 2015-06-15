@@ -35,18 +35,18 @@ public abstract class ConsumerImpl implements Consumer {
      * Interface to the Java 2 platform's core logging facilities.
      */
     private static final Logger logger = LoggerFactory.getLogger(ConsumerImpl.class);
-    
+
     /**
      * The maximum size of the buffer, currently set to 16 KB.
      */
     public static final int BUFFERMAX = 16 * 1024;
-    
+
     /**
      * A buffer containing the unprocessed data received over the reader
      * stream.
      */
     StringBuffer buffer;
-    
+
     /**
      * The reader and writer streams being managed by this
      * <code>Consumer</code>.
@@ -63,7 +63,7 @@ public abstract class ConsumerImpl implements Consumer {
      * reader stream.
      */
     boolean foundEOF = false;
-    
+
     /**
      * A collection of BufferChangeLogger objects that are notified
      * whenever an input change is recorded to this consumer.  When
@@ -93,7 +93,7 @@ public abstract class ConsumerImpl implements Consumer {
         buffer = new StringBuffer();
         bufferChangeLoggers = Collections.synchronizedCollection(new TreeSet<BufferChangeLogger>());
     }
-    
+
     /**
      * Passes data to the writer stream for remote execution from the
      * <code>Consumer</code>.  I'm not really sure why this is useful or
@@ -118,14 +118,14 @@ public abstract class ConsumerImpl implements Consumer {
             writer.flush();
         }
     }
-    
+
     /**
      * Resume processing from the beginning of the buffer.
      */
     public void resume() {
         resume(-1);
     }
-    
+
     /**
      * Requests the <code>Consumer</code> to stop processing data at its
      * next convenient time.

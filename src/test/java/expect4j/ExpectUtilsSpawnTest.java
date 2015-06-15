@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ExpectUtilsSpawnTest {
     private static final Logger logger = LoggerFactory.getLogger(ExpectUtilsSpawnTest.class);
-    
+
     @Test
     public void testSpawnOnUnixLinux() throws Exception {
         System.out.println("spawn (unix/linux test variant)");
@@ -56,14 +56,14 @@ public class ExpectUtilsSpawnTest {
 
         final String executable = "ifconfig";
         final String expResult = "Local Loopback";
-        
+
         final Expect4j expect = ExpectUtils.spawn(executable);
         expect.setDefaultTimeout( 5000 );
-     
+
         // Don't have to do anything, since the match will be saved
         int index = expect.expect(expResult);
         assertEquals(0, index);
-     
+
         String result = expect.getLastState().getMatch();
         assertEquals(expResult, result);
 
@@ -110,20 +110,20 @@ public class ExpectUtilsSpawnTest {
 
         final String executable = "cmd /c net statistics Workstation";
         final String expResult = "Workstation Statistics";
-        
+
         final Expect4j expect = ExpectUtils.spawn(executable);
         expect.setDefaultTimeout( 5000 );
-     
+
         // Don't have to do anything, since the match will be saved
         int index = expect.expect(expResult);
         assertEquals(0, index);
-     
+
         String result = expect.getLastState().getMatch();
         assertEquals(expResult, result);
 
         final StringBuffer receivedStr = new StringBuffer();
         final StringBuffer transmittedStr = new StringBuffer();
-     
+
         List<Match> matches = new ArrayList<>();
         matches.add( new RegExpMatch("Bytes received\\s*(\\d+)\\r\\n", new Closure() {
             public void run(ExpectState state) {
@@ -138,7 +138,7 @@ public class ExpectUtilsSpawnTest {
             }
         }) );
         index = expect.expect( matches );
-     
+
         long received = 0;
         try {
             received = Long.valueOf( receivedStr.toString() ).longValue();
@@ -146,7 +146,7 @@ public class ExpectUtilsSpawnTest {
             logger.warn("Received " + e);
         }
         assertTrue( received > 0 );
-     
+
         long transmitted = 0;
         try {
             transmitted = Long.valueOf( transmittedStr.toString() ).longValue();
@@ -164,20 +164,20 @@ public class ExpectUtilsSpawnTest {
 
         final String executable = "ifconfig lo0";
         final String expResult = "LOOPBACK";
-        
+
         final Expect4j expect = ExpectUtils.spawn(executable);
         expect.setDefaultTimeout( 5000 );
-     
+
         // Don't have to do anything, since the match will be saved
         int index = expect.expect(expResult);
         assertEquals(0, index);
-     
+
         String result = expect.getLastState().getMatch();
         assertEquals(expResult, result);
 
         final StringBuffer mtuStr = new StringBuffer();
         final StringBuffer flagsStr = new StringBuffer();
-     
+
         List<Match> matches = new ArrayList<>();
         matches.add( new RegExpMatch("mtu (\\d+)", new Closure() {
             public void run(ExpectState state) {
@@ -192,7 +192,7 @@ public class ExpectUtilsSpawnTest {
             }
         }) );
         index = expect.expect( matches );
-     
+
         long mtu = 0;
         try {
             mtu = Long.valueOf( mtuStr.toString() ).longValue();
@@ -200,7 +200,7 @@ public class ExpectUtilsSpawnTest {
             logger.warn("MTU " + e);
         }
         assertTrue( mtu > 0 );
-     
+
         long flags = 0;
         try {
             flags = Long.valueOf( flagsStr.toString() ).longValue();

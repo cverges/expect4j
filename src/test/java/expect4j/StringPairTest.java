@@ -27,7 +27,7 @@ import java.io.*;
  * @author Justin Ryan
  */
 public class StringPairTest extends TestCase {
-    
+
     public StringPairTest(String testName) {
         super(testName);
     }
@@ -43,12 +43,12 @@ public class StringPairTest extends TestCase {
      */
     public void testGetReader() throws IOException {
         System.out.println("getReader");
-        
-        String expResult = "The lazy fox";        
+
+        String expResult = "The lazy fox";
         StringPair instance = new StringPair(expResult);
-        
+
         Reader result = instance.getReader();
-        assertNotNull( result );        
+        assertNotNull( result );
     }
 
     /**
@@ -56,11 +56,11 @@ public class StringPairTest extends TestCase {
      */
     public void testGetWriter() {
         System.out.println("getWriter");
-        
+
         StringPair instance = new StringPair("The lazy fox");
-        
+
         Writer result = instance.getWriter();
-        assertTrue( (result instanceof StringWriter) );        
+        assertTrue( (result instanceof StringWriter) );
     }
 
     /**
@@ -68,13 +68,13 @@ public class StringPairTest extends TestCase {
      */
     public void testGetResult() throws IOException {
         System.out.println("getResult");
-        
+
         StringPair instance = new StringPair("The lazy fox");
         instance.getWriter().write("Awake Chicken");
-        
+
         String expResult = "Awake Chicken";
         String result = instance.getResult();
-        assertEquals(expResult, result);        
+        assertEquals(expResult, result);
     }
 
     /**
@@ -82,14 +82,14 @@ public class StringPairTest extends TestCase {
      */
     public void testReset() throws IOException {
         System.out.println("reset");
-        
+
         StringPair instance = new StringPair("The lazy fox");
         instance.getWriter().write("Awake Chicken");
         instance.reset();
-        
+
         String expResult = "";
         String result = instance.getResult();
-        assertEquals(expResult, result);        
+        assertEquals(expResult, result);
     }
-    
+
 }
