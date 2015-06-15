@@ -17,9 +17,15 @@
 
 package expect4j;
 
-import junit.framework.*;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import expect4j.matches.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.util.*;
+import junit.framework.*;
 
 /**
  * TODO
@@ -28,15 +34,30 @@ import java.util.*;
  * @author Justin Ryan
  */
 public class ExpectUtilsHttpTest extends TestCase {
-    
+
+    protected HttpServer httpServer;
+    protected String address = "127.0.0.1";
+    protected int port;
+
     public ExpectUtilsHttpTest(String testName) {
         super(testName);
     }
-    
-    protected void setUp() throws Exception {
+
+    public void setUp() throws Exception {
+        HttpServer httpServer = HttpServer.create(new InetSocketAddress(address, 0), 0);
+        httpServer.createContext("/", new TestHandler());
+        httpServer.setExecutor(null);
+        httpServer.start();
+
+        port = httpServer.getAddress().getPort();
     }
     
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
+        try {
+            httpServer.stop(0);
+        } catch (Exception e) {
+            // Don't worry 'bout it
+        }
     }
     
     /**
@@ -48,14 +69,24 @@ public class ExpectUtilsHttpTest extends TestCase {
         System.setProperty("expect4j.level", "400");
         //java.util.logging.LogManager.getLogManager().readConfiguration();
  
-        String remotehost = "www.seas.harvard.edu";
         String url = "/";
         String expResult = "Harvard School of Engineering and Applied Sciences";
  
-        String result = ExpectUtils.Http(remotehost, url);
+        String result = ExpectUtils.Http(address, port, url);
 
         assertNotNull(result);
  
-        assertTrue( result.indexOf(expResult) != -1 );
+        assertTrue( result.indexOf(TestHandler.response) != -1 );
+    }
+
+    class TestHandler implements HttpHandler {
+        public static final String response = "We cannot solve our problems with the same thinking we used when we created them.";
+
+        public void handle(HttpExchange t) throws IOException {
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
     }
 }
