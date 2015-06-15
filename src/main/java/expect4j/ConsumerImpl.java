@@ -150,6 +150,11 @@ public abstract class ConsumerImpl implements Consumer {
         boolean addedNewLogger = bufferChangeLoggers.add(logger);
         if (addedNewLogger == false) {
             this.logger.warn("Asked to register an already-registered logger, skipping duplicate request");
+        } else {
+            synchronized(this) {
+                char[] existingData = buffer.toString().toCharArray();
+                logger.bufferChanged(existingData, existingData.length);
+            }
         }
     }
 
