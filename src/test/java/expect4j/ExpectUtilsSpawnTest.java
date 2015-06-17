@@ -54,7 +54,7 @@ public class ExpectUtilsSpawnTest {
 
         Assume.assumeThat("This test variant is only intended for Unix/Linux systems", SystemUtils.IS_OS_UNIX || SystemUtils.IS_OS_LINUX, is(true));
 
-        final String executable = "ifconfig";
+        final String executable = "ifconfig lo";
         final String expResult = "Local Loopback";
 
         final Expect4j expect = ExpectUtils.spawn(executable);
@@ -85,21 +85,21 @@ public class ExpectUtilsSpawnTest {
         }));
         index = expect.expect(matches);
 
-        long received = 0;
+        assertTrue(rxStr.length() > 0);
         try {
-            received = Long.valueOf(rxStr.toString()).longValue();
+            assertTrue(Long.valueOf(rxStr.toString()) != null);
         } catch (Exception e) {
             logger.warn("Received " + e);
+            assertTrue(false);
         }
-        assertTrue(received > 0);
 
-        long transmitted = 0;
+        assertTrue(txStr.length() > 0);
         try {
-            transmitted = Long.valueOf(txStr.toString()).longValue();
+            assertTrue(Long.valueOf(txStr.toString()) != null);
         } catch (Exception e) {
-            logger.warn("Transmitted" + e);
+            logger.warn("Transmitted " + e);
+            assertTrue(false);
         }
-        assertTrue(transmitted > 0);
     }
 
     @Test
@@ -139,21 +139,21 @@ public class ExpectUtilsSpawnTest {
         }) );
         index = expect.expect( matches );
 
-        long received = 0;
+        assertTrue(receivedStr.length() > 0);
         try {
-            received = Long.valueOf( receivedStr.toString() ).longValue();
+            assertTrue(Long.valueOf(receivedStr.toString()) != null);
         } catch (Exception e) {
             logger.warn("Received " + e);
+            assertTrue(false);
         }
-        assertTrue( received > 0 );
 
-        long transmitted = 0;
+        assertTrue(transmittedStr.length() > 0);
         try {
-            transmitted = Long.valueOf( transmittedStr.toString() ).longValue();
-        } catch(Exception e) {
-            logger.warn("Transmitted" + e);
+            assertTrue(Long.valueOf(transmittedStr.toString()) != null);
+        } catch (Exception e) {
+            logger.warn("Transmitted " + e);
+            assertTrue(false);
         }
-        assertTrue( transmitted > 0 );
     }
 
     @Test
