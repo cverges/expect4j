@@ -19,10 +19,10 @@ package expect4j;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public abstract class ConsumerImpl implements Consumer {
      * }
      * </pre>
      */
-    Collection<BufferChangeLogger> bufferChangeLoggers;
+    List<BufferChangeLogger> bufferChangeLoggers;
 
     /**
      * Creates a <code>ConsumerImpl</code> instance based on an
@@ -91,7 +91,7 @@ public abstract class ConsumerImpl implements Consumer {
     public ConsumerImpl(IOPair pair) {
         this.pair = pair;
         buffer = new StringBuffer();
-        bufferChangeLoggers = Collections.synchronizedCollection(new TreeSet<BufferChangeLogger>());
+        bufferChangeLoggers = Collections.synchronizedList(new ArrayList<BufferChangeLogger>());
     }
 
     /**
