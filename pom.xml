@@ -4,7 +4,7 @@
 
     <groupId>com.github.cverges</groupId>
     <artifactId>expect4j</artifactId>
-    <version>1.9</version>
+    <version>1.10-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>expect4j</name>
     <url>http://github.com/cverges/expect4j</url>
