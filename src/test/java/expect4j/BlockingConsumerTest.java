@@ -72,6 +72,16 @@ public class BlockingConsumerTest extends TestCase {
     }
 
     public void testRead() {
+        final StringBuffer changeBuffer = new StringBuffer();
+
+        BufferChangeLogger changeLogger = new BufferChangeLogger() {
+            public void bufferChanged(char[] newData, int numChars) {
+                changeBuffer.append(newData, 0, numChars);
+            }
+        };
+
+        consumer.registerBufferChangeLogger(changeLogger);
+
         consumerThread.start();
         try { Thread.sleep(500); }catch(Exception e) { }
 
@@ -81,6 +91,7 @@ public class BlockingConsumerTest extends TestCase {
         consumer.stop();
 
         assertEquals("The lazy fox", result);
+        assertEquals("The lazy fox", changeBuffer.toString());
     }
 
     public void testMatch() {

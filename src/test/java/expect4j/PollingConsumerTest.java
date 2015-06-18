@@ -72,7 +72,18 @@ public class PollingConsumerTest extends TestCase {
     }
 
     public void testRead() {
-	System.out.println("testRead");
+        System.out.println("testRead");
+
+        final StringBuffer changeBuffer = new StringBuffer();
+
+        BufferChangeLogger changeLogger = new BufferChangeLogger() {
+            public void bufferChanged(char[] newData, int numChars) {
+                changeBuffer.append(newData, 0, numChars);
+            }
+        };
+
+        consumer.registerBufferChangeLogger(changeLogger);
+
         consumerThread.start();
         try { Thread.sleep(500); }catch(Exception e) { }
 
@@ -81,8 +92,11 @@ public class PollingConsumerTest extends TestCase {
 
         consumer.stop();
 
-	System.out.println(result);
+        System.out.println(result);
         assertEquals("The lazy fox", result);
+
+        System.out.println(changeBuffer.toString());
+        assertEquals("The lazy fox", changeBuffer.toString());
     }
 
     public void testMatch() {
