@@ -53,11 +53,28 @@ public interface Consumer extends Runnable {
     public void send(String data) throws IOException;
 
     /**
-     * TODO
-     *
-     * @return TODO
+     * @return the entire contents of the buffer.
      */
     public String pause();
+
+    /**
+     * It is often desired to limit the size of the returned contents
+     * (unlike {@code pause()} which will return the entire contents),
+     * since the processing of long {@code String}s -- especially with
+     * regular expressions -- is highly demanding, and may affect
+     * overall performance significantly, even if the contents are
+     * "short" for the vast majority of times.
+     *
+     * The recommended limit may vary from one program to another,
+     * but a good start would be around 1024 characters.
+     *
+     * @param maxLength the maximum number of characters to return
+     *                  from the beginning of the buffer.
+     * @return the contents of the buffer up to the given amount
+     *         of characters.
+     */
+    public String pause(int maxLength);
+
 
     /**
      * Resume processing from the beginning of the buffer.
