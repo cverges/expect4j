@@ -174,16 +174,13 @@ public class BlockingConsumer extends ConsumerImpl {
         }
     }
 
-    /**
-     * TODO
-     *
-     * @return TODO
-     */
     public String pause() {
-        // TODO mark offset, so that it can be trimmed by resume coming in later
-        String currentBuffer;
-        currentBuffer = buffer.toString();
-        return currentBuffer;
+        return pause(Integer.MAX_VALUE);
+    }
+
+    public String pause(int maxLength) {
+
+        return buffer.substring(0, Math.min(maxLength, buffer.length()));
     }
 
     /**

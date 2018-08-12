@@ -184,10 +184,14 @@ public class PollingConsumer extends ConsumerImpl {
     }
 
     public String pause() {
-        // TODO mark offset, so that it can be trimmed by resume coming in later
+
+        return pause(Integer.MAX_VALUE);
+    }
+
+    public String pause(int maxLength) {
         String currentBuffer;
         synchronized(this) { // stop consumer from continuing
-            currentBuffer = buffer.toString();
+            currentBuffer = buffer.substring(0, Math.min(maxLength, buffer.length()));
             dirtyBuffer = false;
             callerProcessing = Boolean.TRUE;
         }

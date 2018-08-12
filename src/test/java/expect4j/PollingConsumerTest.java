@@ -89,11 +89,13 @@ public class PollingConsumerTest extends TestCase {
 
         // should be available by now
         String result = consumer.pause();
+        String truncatedResult = consumer.pause(1);
 
         consumer.stop();
 
         System.out.println(result);
         assertEquals("The lazy fox", result);
+        assertEquals("T", truncatedResult);
 
         System.out.println(changeBuffer.toString());
         assertEquals("The lazy fox", changeBuffer.toString());
@@ -107,12 +109,16 @@ public class PollingConsumerTest extends TestCase {
         consumer.waitForBuffer(500);
 
         String result = consumer.pause();
+        String truncatedResult = consumer.pause(1);
         assertEquals("The lazy fox", result);
+        assertEquals("T", truncatedResult);
 
         consumer.resume(4);
 
         result = consumer.pause();
+        truncatedResult = consumer.pause(1);
         assertEquals("azy fox", result);
+        assertEquals("a", truncatedResult);
 
         consumer.stop();
 
