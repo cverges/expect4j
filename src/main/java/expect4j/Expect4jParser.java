@@ -123,17 +123,15 @@ public class Expect4jParser extends Expect4j{
                     commandList = new ArrayList<String>();
                 }
 
-                if(c.matches("expect \".*")){
-                    Matcher m = java.util.regex.Pattern.compile("expect \"(.*)\".*").matcher(c);
-                    if(m.find()){
-                        String expCmd = m.group(1);
+                Matcher m = java.util.regex.Pattern.compile("expect \"(.*)\".*").matcher(c);
+                if (m.find()) {
+                    String expCmd = m.group(1);
 
 
-                        expMap = new HashMap<String, Object>();
-                        expMap.put(EXPECT_KEYWORD, expCmd);
-                    }
+                    expMap = new HashMap<String, Object>();
+                    expMap.put(EXPECT_KEYWORD, expCmd);
 
-                }else if(c.matches("expect \\{.*")){
+                } else if (c.matches("expect \\{.*")) {
                     isIf = true;
                 }
 
@@ -147,17 +145,15 @@ public class Expect4jParser extends Expect4j{
                     while(!c.matches(endIfPattern)){
                         String ifPattern = "\\s*\"(.*)\".*\\{\\s*";
                         String sendPattern = ".*send\\s*\"(.*)\"\\s*";
-                        if(c.matches(ifPattern)){
-                            Matcher m = java.util.regex.Pattern.compile(ifPattern).matcher(c);
-                            m.find();
+                        Matcher m = java.util.regex.Pattern.compile(ifPattern).matcher(c);
+                        if(m.find()){
                             String expression = m.group(1);
 
                             c = l[++i];
                             final List<String> matchCommandList = new ArrayList<String>();
                             while(!c.matches(endIfPattern)){
-                                if (c.matches(sendPattern)) {
-                                    Matcher m2 = java.util.regex.Pattern.compile(sendPattern).matcher(c);
-                                    m2.find();
+                                Matcher m2 = java.util.regex.Pattern.compile(sendPattern).matcher(c);
+                                if (m2.find()) {
                                     String sendExpresson = m2.group(1);
                                     matchCommandList.add(sendExpresson.replaceAll("\\\\r","\r" ));
 
