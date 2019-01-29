@@ -355,6 +355,22 @@ public class Expect4jTest extends TestCase {
         assertEquals(0, index);
     }
 
+    public void testParser() throws Exception {
+        logger.info("expect parser serial patterns");
+        Expect4jParser instance = new Expect4jParser(pair);
+
+        String script = "expect \"quick\"\n" +
+                "send \"In the middle\"\n" +
+                "expect \"brown\"";
+        instance.runScript(script);
+
+        String match = instance.getLastState().getMatch();
+
+        assertEquals("brown", match);
+
+    }
+
+
     /**
      * Tests to write:
      * EOF (with and without)
