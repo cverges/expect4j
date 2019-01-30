@@ -50,45 +50,20 @@ public class Expect4jParser extends Expect4j{
     public void runScript(String cmd) throws Exception {
 
 
-        List<Map> parsedCommandList = parse(cmd);
+        List<Map<String, Object>> parsedCommandList = parse(cmd);
 
         if(parsedCommandList.isEmpty()){
             throw new Exception("faulty script definition!");
         }
 
-        for(Map m: parsedCommandList){
-            if(m.get(EXPECT_KEYWORD) == null) {
-                final List<String> sendCommandList = (List<String>) m.get(COMMAND_LIST);
-                if(sendCommandList != null){
-                    for(String sendCommand: sendCommandList){
-                        send(sendCommand);
-                    }
+        for(Map<String,Object> m: parsedCommandList){
+            if(m.get(EXPECT_KEYWORD) == null && m.get(COMMAND_LIST)!=null) {
+                List<String> sendCommandList = (List<String>) m.get(COMMAND_LIST);
+                for(String sendCommand: sendCommandList){
+                    send(sendCommand);
                 }
             }else if (m.get(EXPECT_KEYWORD) instanceof String){
-                final String expCmd = (String) m.get(EXPECT_KEYWORD);
-                final List<String> sendCommandList = (List<String>) m.get(COMMAND_LIST);
-
-                expect(expCmd, new Closure() {
-                    @Override
-                    public void run(ExpectState expectState) throws Exception {
-                        logger.info("found a match with buffer '{}' ", expectState.getBuffer());
-                        logger.info("last match '{}'", expectState.getMatch());
-
-                        if(sendCommandList != null && !sendCommandList.isEmpty()){
-                            for(String sendCommand: sendCommandList){
-                                logger.info("sending command: '{}'", sendCommand);
-                                if(sendCommand.contains("sleep")){
-                                    String t = sendCommand.split(" ")[1];
-                                    Thread.sleep(Long.valueOf(t));
-                                } else {
-                                    send(sendCommand);
-                                }
-                            }
-                        }
-
-                    }
-                });
-
+                processExpectStatement(m);
             } else if (m.get(EXPECT_KEYWORD) instanceof List){
                 List<Match> exp = (List<Match>) m.get(EXPECT_KEYWORD);
                 expect(exp);
@@ -101,10 +76,36 @@ public class Expect4jParser extends Expect4j{
 
     }
 
-    private List<Map> parse(String script){
+    private void processExpectStatement(Map<String, Object> m) throws Exception {
+        final String expCmd = (String) m.get(EXPECT_KEYWORD);
+        final List<String> sendCommandList = (List<String>) m.get(COMMAND_LIST);
+
+        expect(expCmd, new Closure() {
+            @Override
+            public void run(ExpectState expectState) throws Exception {
+                logger.info("found a match with buffer '{}' ", expectState.getBuffer());
+                logger.info("last match '{}'", expectState.getMatch());
+
+                if(sendCommandList != null && !sendCommandList.isEmpty()){
+                    for(String sendCommand: sendCommandList){
+                        logger.info("sending command: '{}'", sendCommand);
+                        if(sendCommand.contains("sleep")){
+                            String t = sendCommand.split(" ")[1];
+                            Thread.sleep(Long.valueOf(t));
+                        } else {
+                            send(sendCommand);
+                        }
+                    }
+                }
+
+            }
+        });
+    }
+
+    private List<Map<String, Object>> parse(String script){
         String[] l = script.split("\n");
 
-        List<Map> mapList = new ArrayList<Map>();
+        List<Map<String, Object>> mapList = new ArrayList<>();
         List<String> commandList = new ArrayList<String>();
         Map<String,Object> expMap = new HashMap<String, Object>();
         boolean isIf = false;
@@ -164,33 +165,10 @@ public class Expect4jParser extends Expect4j{
                                 c = l[++i];
                             }
 
-                            try {
-                                matchList.add(new RegExpMatch(expression, new Closure() {
-                                    @Override
-                                    public void run(ExpectState expectState) throws Exception {
-                                        for(String s: matchCommandList){
-                                            if(s.equalsIgnoreCase("exit 1")){
-                                                throw new Exception("bad situation. terminating!");
-                                            } else if (s.equalsIgnoreCase("exit")){
-                                                logger.info("terminating script");
-
-                                            }else if(s.contains("sleep")){
-                                                String t = s.split(" ")[1];
-                                                Thread.sleep(Long.valueOf(t));
-                                            } else if(s.contains("exp_continue")){
-                                                expectState.exp_continue();
-                                            } else {
-                                                send(s);
-                                            }
-
-                                        }
-
-                                    }
-                                }));
-                            } catch (MalformedPatternException e1) {
-                                logger.error("Error", e1);
+                            Match match = getMatch(expression, matchCommandList);
+                            if(match != null){
+                                matchList.add(match);
                             }
-
                         }
 
                         c = l[++i];
@@ -226,5 +204,46 @@ public class Expect4jParser extends Expect4j{
         }
 
         return mapList;
+    }
+
+    private Match getMatch(String expression, final List<String> matchCommandList)  {
+        try {
+            return new RegExpMatch(expression, new Closure() {
+                @Override
+                public void run(ExpectState expectState) throws Exception {
+                    for (String s : matchCommandList) {
+                        if (s.matches("exit 1(\\s+.*)?")) {
+                            logger.warn("terminating script with exit code 1");
+                            String[] ts = s.split("exit 1");
+                            if (ts.length > 1) {
+                                String t = ts[1].trim();
+                                String errorMessage = t.replaceAll("\"", "");
+                                throw new Exception(errorMessage);
+                            } else {
+                                throw new Exception("bad situation. terminating!");
+                            }
+
+
+                        } else if (s.equalsIgnoreCase("exit")) {
+                            logger.info("script successful. terminating");
+
+                        } else if (s.contains("sleep")) {
+                            String t = s.split(" ")[1];
+                            Thread.sleep(Long.valueOf(t));
+                        } else if (s.contains("exp_continue")) {
+                            expectState.exp_continue();
+                        } else {
+                            send(s);
+                        }
+
+                    }
+
+                }
+            });
+        } catch (MalformedPatternException e) {
+            logger.error("Error", e);
+        }
+
+        return null;
     }
 }
