@@ -25,9 +25,9 @@ public class Expect4jParser extends Expect4j{
     /**
      * Interface to the Java 2 platform's core logging facilities.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Expect4j.class);
+    private static final Logger logger = LoggerFactory.getLogger(Expect4jParser.class);
 
-    private static final String COMMAND_LIST = "commandList";
+    private static final String SEND = "send";
     private static final String EXPECT_KEYWORD = "expect";
 
     public Expect4jParser(IOPair pair) {
@@ -57,9 +57,10 @@ public class Expect4jParser extends Expect4j{
         }
 
         for(Map<String,Object> m: parsedCommandList){
-            if(m.get(EXPECT_KEYWORD) == null && m.get(COMMAND_LIST)!=null) {
-                List<String> sendCommandList = (List<String>) m.get(COMMAND_LIST);
+            if(m.get(EXPECT_KEYWORD) == null && m.get(SEND)!=null) {
+                List<String> sendCommandList = (List<String>) m.get(SEND);
                 for(String sendCommand: sendCommandList){
+                    logger.info("sending command: \"{}\"", sendCommand);
                     send(sendCommand);
                 }
             }else if (m.get(EXPECT_KEYWORD) instanceof String){
@@ -67,6 +68,14 @@ public class Expect4jParser extends Expect4j{
             } else if (m.get(EXPECT_KEYWORD) instanceof List){
                 List<Match> exp = (List<Match>) m.get(EXPECT_KEYWORD);
                 expect(exp);
+                List<String> sendCommandList = (List<String>) m.get(SEND);
+                if(sendCommandList!= null){
+                    for(String sendCommand: sendCommandList){
+                        logger.info("sending command: \"{}\"", sendCommand);
+                        send(sendCommand);
+                    }
+                }
+
             }
 
             if(getLastState().getMatch() == null){
@@ -78,17 +87,17 @@ public class Expect4jParser extends Expect4j{
 
     private void processExpectStatement(Map<String, Object> m) throws Exception {
         final String expCmd = (String) m.get(EXPECT_KEYWORD);
-        final List<String> sendCommandList = (List<String>) m.get(COMMAND_LIST);
+        final List<String> sendCommandList = (List<String>) m.get(SEND);
 
         expect(expCmd, new Closure() {
             @Override
             public void run(ExpectState expectState) throws Exception {
-                logger.info("found a match with buffer '{}' ", expectState.getBuffer());
-                logger.info("last match '{}'", expectState.getMatch());
+                logger.info("found a match with buffer \n{} ", expectState.getBuffer());
+                logger.info("last match \n{}", expectState.getMatch());
 
                 if(sendCommandList != null && !sendCommandList.isEmpty()){
                     for(String sendCommand: sendCommandList){
-                        logger.info("sending command: '{}'", sendCommand);
+                        logger.info("sending command: \"{}\"", sendCommand);
                         if(sendCommand.contains("sleep")){
                             String t = sendCommand.split(" ")[1];
                             Thread.sleep(Long.valueOf(t));
@@ -118,7 +127,7 @@ public class Expect4jParser extends Expect4j{
             if(c.contains(EXPECT_KEYWORD)){
 
                 if(!commandList.isEmpty()){
-                    expMap.put(COMMAND_LIST, commandList);
+                    expMap.put(SEND, commandList);
                     mapList.add(expMap);
                     expMap = new HashMap<String, Object>();
                     commandList = new ArrayList<String>();
@@ -197,7 +206,7 @@ public class Expect4jParser extends Expect4j{
         }
 
         if(!commandList.isEmpty()){
-            expMap.put(COMMAND_LIST, commandList);
+            expMap.put(SEND, commandList);
         }
         if(!mapList.contains(expMap)){
             mapList.add(expMap);
@@ -212,6 +221,7 @@ public class Expect4jParser extends Expect4j{
                 @Override
                 public void run(ExpectState expectState) throws Exception {
                     for (String s : matchCommandList) {
+                        logger.debug("sending command \"{}\"", s);
                         if (s.matches("exit 1(\\s+.*)?")) {
                             logger.warn("terminating script with exit code 1");
                             String[] ts = s.split("exit 1");
