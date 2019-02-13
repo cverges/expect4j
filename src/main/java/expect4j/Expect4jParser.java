@@ -60,8 +60,7 @@ public class Expect4jParser extends Expect4j{
             if(m.get(EXPECT_KEYWORD) == null && m.get(SEND)!=null) {
                 List<String> sendCommandList = (List<String>) m.get(SEND);
                 for(String sendCommand: sendCommandList){
-                    logger.info("sending command: \"{}\"", sendCommand);
-                    send(sendCommand);
+                    sendCommand(null, sendCommand);
                 }
             }else if (m.get(EXPECT_KEYWORD) instanceof String){
                 processExpectStatement(m);
@@ -71,8 +70,7 @@ public class Expect4jParser extends Expect4j{
                 List<String> sendCommandList = (List<String>) m.get(SEND);
                 if(sendCommandList!= null){
                     for(String sendCommand: sendCommandList){
-                        logger.info("sending command: \"{}\"", sendCommand);
-                        send(sendCommand);
+                        sendCommand(null, sendCommand);
                     }
                 }
 
@@ -97,13 +95,7 @@ public class Expect4jParser extends Expect4j{
 
                 if(sendCommandList != null && !sendCommandList.isEmpty()){
                     for(String sendCommand: sendCommandList){
-                        logger.info("sending command: \"{}\"", sendCommand);
-                        if(sendCommand.contains("sleep")){
-                            String t = sendCommand.split(" ")[1];
-                            Thread.sleep(Long.valueOf(t));
-                        } else {
-                            send(sendCommand);
-                        }
+                        sendCommand(expectState, sendCommand);
                     }
                 }
 
@@ -121,7 +113,7 @@ public class Expect4jParser extends Expect4j{
         for(int i=0; i<l.length; i++){
             String c = l[i];
 
-            if(c.matches("#.*")){
+            if(c.matches("^\\s*#.*$")){
                 continue;
             }
             if(c.contains(EXPECT_KEYWORD)){
@@ -208,7 +200,8 @@ public class Expect4jParser extends Expect4j{
         if(!commandList.isEmpty()){
             expMap.put(SEND, commandList);
         }
-        if(!mapList.contains(expMap)){
+
+        if(!expMap.isEmpty() && !mapList.contains(expMap)){
             mapList.add(expMap);
         }
 
@@ -221,31 +214,7 @@ public class Expect4jParser extends Expect4j{
                 @Override
                 public void run(ExpectState expectState) throws Exception {
                     for (String s : matchCommandList) {
-                        logger.debug("sending command \"{}\"", s);
-                        if (s.matches("exit 1(\\s+.*)?")) {
-                            logger.warn("terminating script with exit code 1");
-                            String[] ts = s.split("exit 1");
-                            if (ts.length > 1) {
-                                String t = ts[1].trim();
-                                String errorMessage = t.replaceAll("\"", "");
-                                throw new Exception(errorMessage);
-                            } else {
-                                throw new Exception("bad situation. terminating!");
-                            }
-
-
-                        } else if (s.equalsIgnoreCase("exit")) {
-                            logger.info("script successful. terminating");
-
-                        } else if (s.contains("sleep")) {
-                            String t = s.split(" ")[1];
-                            Thread.sleep(Long.valueOf(t));
-                        } else if (s.contains("exp_continue")) {
-                            expectState.exp_continue();
-                        } else {
-                            send(s);
-                        }
-
+                        sendCommand(expectState, s);
                     }
 
                 }
@@ -255,5 +224,36 @@ public class Expect4jParser extends Expect4j{
         }
 
         return null;
+    }
+
+    private void sendCommand(ExpectState expectState, String s) throws Exception {
+        logger.debug("sending command \"{}\"", s);
+        if (s.matches("exit 1(\\s+.*)?")) {
+            logger.warn("terminating script with exit code 1");
+            String[] ts = s.split("exit 1");
+            if (ts.length > 1) {
+                String t = ts[1].trim();
+                String errorMessage = t.replaceAll("\"", "");
+                throw new Exception(errorMessage);
+            } else {
+                throw new Exception("bad situation. terminating!");
+            }
+
+
+        } else if (s.equalsIgnoreCase("exit")) {
+            logger.info("script successful. terminating");
+
+        } else if (s.contains("sleep")) {
+            String t = s.split(" ")[1];
+            Thread.sleep(Long.valueOf(t));
+        } else if (s.contains("exp_continue")) {
+            if(expectState != null){
+                expectState.exp_continue();
+            } else {
+                getLastState().exp_continue();
+            }
+        } else {
+            send(s);
+        }
     }
 }
